@@ -1,5 +1,6 @@
 ---
 import '../styles/gallery.css';
+const title = "Galleries";
 ---
 
 <html lang="en">
@@ -8,10 +9,10 @@ import '../styles/gallery.css';
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Fonts gallery</title>
+		<title>{title}</title>
   </head>
 	<body>
-		<h1>Fonts Gallery</h1>
+		<h1>{title}</h1>
 		<div class="content">
 			<slot />
 		</div>
