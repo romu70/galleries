@@ -1,0 +1,60 @@
+/* most of this file comes from this tutorial::after
+  https://blog.logrocket.com/responsive-image-gallery-css-flexbox/
+*/
+
+:root {
+  --line-height: 1.25rem;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  padding-top: 3%;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1rem;
+  line-height: var(--line-height);
+}
+
+.content {
+  padding: 2% 5%;
+}
+
+h1 {
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  text-align: center;
+}
+
+.fonts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.fonts > .font {
+  flex: 1 1 auto;
+  height: 20rem;
+  position: relative;
+  cursor: pointer;
+}
+
+.fonts .font img {
+  object-fit: cover;
+  width: 100%;
+  height: calc(100% - 3*var(--line-height));
+  vertical-align: middle;
+  border-radius: 5px;
+}
+
+/* Ensure the last line is correctly  aligned
+  by adding an empty element with the same width as other images.
+*/
+.fonts::after {
+  content: "";
+  flex-grow: 999;
+}
+

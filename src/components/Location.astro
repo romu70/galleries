@@ -1,0 +1,10 @@
+---
+const { latitude, longitude } = Astro.props;
+const locationRoot = "https://www.openstreetmap.org/#map=18/";
+
+let url = locationRoot + latitude + "/" + longitude;
+---
+
+<div class="location">
+  <a href={url} target="_blank">Position</a>
+</div>
