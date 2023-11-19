@@ -8,6 +8,10 @@ import { Image } from 'astro:assets';
 
 const allFonts = await getCollection("fonts");
 
+function toto() {
+  console.log('toto');
+}
+
 ---
 
 <Page>
@@ -17,18 +21,55 @@ const allFonts = await getCollection("fonts");
 	<div class="fonts">
     {
       allFonts.map((font) => (
-        // <Debug {font} /> 
+
+        // <Debug {font} />
+            
         <div class="font">
-          <div class="metadata">
-            <Date date={font.data.pubDate} />
-            <div class="place">
-              {font.data.location}
-            </div>
-            <Location latitude={font.data.latitude} longitude={font.data.longitude} />
+          <label class="font" id={'label-' + font.slug} >
+            <Image src={font.data.image.file} alt={font.data.image.alt} />
+          </label>
+          <div class="overlay" id={'overlay-' + font.slug}>
+            <span class="close" id={'closeBtn-' + font.slug} >✖</span>
+            <Image src={font.data.image.file} alt={font.data.image.alt} />
           </div>
-          <Image src={font.data.image.file} alt={font.data.image.alt} />
         </div>
+                
+        // <div class="font">
+        //   <div class="metadata">
+        //     <Date date={font.data.pubDate} />
+        //     <div class="place">
+        //       {font.data.location}
+        //     </div>
+        //     <Location latitude={font.data.latitude} longitude={font.data.longitude} />
+        //   </div>
+          
+        //   <Image src={font.data.image.file} alt={font.data.image.alt} />
+        // </div>
       ))
     }
   </div>
+  <script>
+    // Get all labels
+    const labels = document.querySelectorAll('label.font');
+
+    // Handle clicks on each label.
+    labels.forEach((label) => {
+      let id = label.id.replace("label-", "");
+
+      label.addEventListener('click', () => {
+        document.getElementById('overlay-' + id).style.display = 'flex';
+      });
+    });
+
+    // Get all close button
+    const closes = document.querySelectorAll('span.close');
+    // Handle clicks on each button.
+    closes.forEach((close) => {
+      let id = close.id.replace("closeBtn-", "");
+
+      close.addEventListener('click', () => {
+        document.getElementById('overlay-' + id).style.display = 'none';
+      });
+    });
+  </script>
 </Page>
