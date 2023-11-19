@@ -17,6 +17,7 @@ body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   font-size: 1rem;
   line-height: var(--line-height);
+  background-color: #303030;
 }
 
 .content {
@@ -27,6 +28,7 @@ h1 {
   margin-bottom: 2rem;
   font-size: 2rem;
   text-align: center;
+  color: wheat;
 }
 
 .fonts {
@@ -58,3 +60,33 @@ h1 {
   flex-grow: 999;
 }
 
+/* Style for the overlay */
+.overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  justify-content: center;
+  align-items: center;
+}
+
+/* Style for the enlarged image inside the overlay */
+.overlay img {
+  max-width: 90%;
+  max-height: 90%;
+  border: 2px solid white;
+  border-radius: 5px;
+}
+
+/* Additional style for close button */
+.overlay .close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  color: white;
+  font-size: 20px;
+}
