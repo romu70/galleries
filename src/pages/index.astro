@@ -20,8 +20,6 @@ const allFonts = await getCollection("fonts");
 
         // <Debug {font} />
 
-//TODO: thème graphique        
-
         <div class="font">
           <div class="thumb" id={'thumb-' + font.slug} data-slug={font.slug} >
             <Image src={font.data.image.file} alt={font.data.image.alt} />
@@ -37,16 +35,18 @@ const allFonts = await getCollection("fonts");
   <script>
     // Get all labels
     const thumbs = document.querySelectorAll('div[data-slug]');
-    var open = null;
 
     // Handle clicks on each label.
     thumbs.forEach((thumb) => {
       thumb.addEventListener('click', () => {
-        if(open !== null) {
-          document.getElementById(open).style.display = 'none';
-        }
-        open = 'overlay-' + thumb.dataset.slug;
-        document.getElementById(open).style.display = 'flex';
+
+        // Close all overlays
+        const items = document.querySelectorAll('div.overlay');
+        items.forEach((item) => {
+          item.style.display = 'none';
+        });
+
+        document.getElementById('overlay-' + thumb.dataset.slug).style.display = 'flex';
       });
     });
 
@@ -55,8 +55,7 @@ const allFonts = await getCollection("fonts");
     // Handle clicks on each button.
     closes.forEach((close) => {
       close.addEventListener('click', () => {
-        document.getElementById(open).style.display = 'none';
-        open = null;
+        document.getElementById('overlay-' + close.dataset.slug).style.display = 'none';
       });
     });
   </script>
