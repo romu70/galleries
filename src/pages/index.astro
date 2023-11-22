@@ -8,10 +8,6 @@ import { Image } from 'astro:assets';
 
 const allFonts = await getCollection("fonts");
 
-function toto() {
-  console.log('toto');
-}
-
 ---
 
 <Page>
@@ -23,52 +19,44 @@ function toto() {
       allFonts.map((font) => (
 
         // <Debug {font} />
-            
+
+//TODO: thème graphique        
+
         <div class="font">
-          <label class="font" id={'label-' + font.slug} >
+          <div class="thumb" id={'thumb-' + font.slug} data-slug={font.slug} >
             <Image src={font.data.image.file} alt={font.data.image.alt} />
-          </label>
+          </div>
           <div class="overlay" id={'overlay-' + font.slug}>
-            <span class="close" id={'closeBtn-' + font.slug} >✖</span>
+            <span class="close" data-slug={font.slug} >✖</span>
             <Image src={font.data.image.file} alt={font.data.image.alt} />
           </div>
         </div>
-                
-        // <div class="font">
-        //   <div class="metadata">
-        //     <Date date={font.data.pubDate} />
-        //     <div class="place">
-        //       {font.data.location}
-        //     </div>
-        //     <Location latitude={font.data.latitude} longitude={font.data.longitude} />
-        //   </div>
-          
-        //   <Image src={font.data.image.file} alt={font.data.image.alt} />
-        // </div>
       ))
     }
   </div>
   <script>
     // Get all labels
-    const labels = document.querySelectorAll('label.font');
+    const thumbs = document.querySelectorAll('div[data-slug]');
+    var open = null;
 
     // Handle clicks on each label.
-    labels.forEach((label) => {
-      let id = label.id.replace("label-", "");
-
-      label.addEventListener('click', () => {
-        document.getElementById('overlay-' + id).style.display = 'flex';
+    thumbs.forEach((thumb) => {
+      thumb.addEventListener('click', () => {
+        if(open !== null) {
+          document.getElementById(open).style.display = 'none';
+        }
+        open = 'overlay-' + thumb.dataset.slug;
+        document.getElementById(open).style.display = 'flex';
       });
     });
 
     // Get all close button
-    const closes = document.querySelectorAll('span.close');
+    const closes = document.querySelectorAll('span[data-slug]');
     // Handle clicks on each button.
     closes.forEach((close) => {
-      let id = close.id.replace("closeBtn-", "");
-
       close.addEventListener('click', () => {
-        document.getElementById('overlay-' + id).style.display = 'none';
+        document.getElementById(open).style.display = 'none';
+        open = null;
       });
     });
   </script>
