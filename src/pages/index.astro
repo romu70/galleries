@@ -9,6 +9,10 @@ import { Image } from 'astro:assets';
 const allFonts = await getCollection("fonts");
 
 ---
+<!--
+//TODO: Add previous/next buttons
+//TODO: Add metadata
+ -->
 
 <Page>
   <!-- <h1>The current URL is: {Astro.url}</h1>
@@ -22,6 +26,13 @@ const allFonts = await getCollection("fonts");
 
         <div class="font">
           <div class="thumb" id={'thumb-' + font.slug} data-slug={font.slug} >
+            <div class="metadata">
+              <Date date={font.data.pubDate} />
+              <div class="place">
+                {font.data.place}
+              </div>
+              <Location node={font.data.node} />
+            </div>
             <Image src={font.data.image.file} alt={font.data.image.alt} />
           </div>
           <div class="overlay" id={'overlay-' + font.slug}>

@@ -7,8 +7,7 @@ const fonts = defineCollection({
   schema: ({ image }) => z.object({
     place: z.string(),
     pubDate: z.date(),
-    latitude: z.number(),
-    longitude: z.number(),
+    node: z.number(),
     image: z.object({
       file: image(),
       alt: z.string(),
