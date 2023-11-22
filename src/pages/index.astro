@@ -25,15 +25,12 @@ const allFonts = await getCollection("fonts");
         // <Debug {font} />
 
         <div class="font">
-          <div class="thumb" id={'thumb-' + font.slug} data-slug={font.slug} >
+          <div class="thumb">
+            <Image src={font.data.image.file} alt={font.data.image.alt} data-slug={font.slug} />
             <div class="metadata">
               <Date date={font.data.pubDate} />
-              <div class="place">
-                {font.data.place}
-              </div>
-              <Location node={font.data.node} />
+              <Location node={font.data.node} place={font.data.place} />
             </div>
-            <Image src={font.data.image.file} alt={font.data.image.alt} />
           </div>
           <div class="overlay" id={'overlay-' + font.slug}>
             <span class="close" data-slug={font.slug} >✖</span>
@@ -45,7 +42,7 @@ const allFonts = await getCollection("fonts");
   </div>
   <script>
     // Get all labels
-    const thumbs = document.querySelectorAll('div[data-slug]');
+    const thumbs = document.querySelectorAll('img[data-slug]');
 
     // Handle clicks on each label.
     thumbs.forEach((thumb) => {

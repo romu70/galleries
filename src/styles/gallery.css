@@ -58,6 +58,10 @@ h1 {
   border-radius: 5px;
 }
 
+.metadata {
+  margin-top: 0.5rem;
+}
+
 /* Ensure the last line is correctly  aligned
   by adding an empty element with the same width as other images.
 */
@@ -85,6 +89,7 @@ h1 {
   align-items: center;
   z-index: 10;
   padding: 2rem;
+  border: 2px solid #555;
   box-shadow: rgba(255, 255, 255, 0.16) 0px 10px 36px 0px, rgba(255, 255, 255, 0.06) 0px 0px 0px 1px;}
 
 /* Style for the enlarged image inside the overlay */
