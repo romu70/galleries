@@ -26,10 +26,12 @@ const allFonts = await getCollection("fonts");
 
         <div class="font">
           <div class="thumb">
-            <Image src={font.data.image.file} alt={font.data.image.alt} data-slug={font.slug} />
+            <div class="image">
+              <Image src={font.data.image.file} alt={font.data.image.alt} data-slug={font.slug} />
+            </div>
             <div class="metadata">
               <Date date={font.data.pubDate} />
-              <Location node={font.data.node} place={font.data.place} />
+              <Location node={font.data.node} place={font.data.image.alt + ", " + font.data.place} />
             </div>
           </div>
           <div class="overlay" id={'overlay-' + font.slug}>
@@ -41,6 +43,37 @@ const allFonts = await getCollection("fonts");
     }
   </div>
   <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const images = document.querySelectorAll('.image');
+
+      images.forEach(image => {
+        const img = image.querySelector('img');
+
+        if (img.complete) {
+          cropAndPositionImage(image, img);
+        } else {
+          img.addEventListener('load', () => {
+            cropAndPositionImage(image, img);
+          });
+        }
+      });
+    });
+
+    function cropAndPositionImage(container, img) {
+      console.log(container);
+      console.log(img);
+      const imgRatio = img.width / img.height;
+      const containerRatio = container.offsetWidth / container.offsetHeight;
+
+        if (imgRatio > containerRatio) {
+            img.style.width = '100%';
+            img.style.height = 'auto';
+        } else {
+            img.style.width = 'auto';
+            img.style.height = '100%';
+        }
+    }
+
     // Get all labels
     const thumbs = document.querySelectorAll('img[data-slug]');
 

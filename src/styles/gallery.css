@@ -40,26 +40,27 @@ h1 {
 .fonts {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 2rem;
 }
 
 .fonts > .font {
   flex: 1 1 auto;
-  height: 20rem;
   position: relative;
   cursor: pointer;
+  width: 20rem;
+  height: 20rem;
+  overflow:hidden;
 }
 
-.fonts .font .thumb img {
-  object-fit: cover;
-  width: 100%;
-  height: calc(100% - 3*var(--line-height));
-  vertical-align: middle;
-  border-radius: 5px;
+.fonts .font .thumb .image,
+.fonts .font .thumb .image img {
+  width: 10rem;
+  height: 10rem;
+  margin: 5px;
 }
 
 .metadata {
-  margin-top: 0.5rem;
+  margin-top: 1rem;
 }
 
 /* Ensure the last line is correctly  aligned
@@ -68,10 +69,6 @@ h1 {
 .fonts::after {
   content: "";
   flex-grow: 999;
-}
-
-.thumb {
-  height:100%
 }
 
 /* Style for the overlay */
@@ -95,9 +92,9 @@ h1 {
 /* Style for the enlarged image inside the overlay */
 .overlay img {
   flex: 1 1 auto;
-  /* height:90%;
+  height:90%;
   max-width: 90%;
-  max-height: 90%; */
+  max-height: 90%;
 }
 
 /* Additional style for close button */
