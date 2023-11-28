@@ -26,83 +26,11 @@ body {
   background-color: #303030;
 }
 
-.content {
-  padding: 2% 5%;
-}
-
 h1 {
   margin-bottom: 2rem;
-  font-size: 2rem;
+  font-size: 4rem;
+  line-height: normal;
   text-align: center;
   color:var(--main-color)
 }
 
-.fonts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-}
-
-.fonts > .font {
-  flex: 1 1 auto;
-  position: relative;
-  cursor: pointer;
-  width: 20rem;
-  height: 20rem;
-  overflow:hidden;
-}
-
-.fonts .font .thumb .image,
-.fonts .font .thumb .image img {
-  width: 10rem;
-  height: 10rem;
-  margin: 5px;
-}
-
-.metadata {
-  margin-top: 1rem;
-}
-
-/* Ensure the last line is correctly  aligned
-  by adding an empty element with the same width as other images.
-*/
-.fonts::after {
-  content: "";
-  flex-grow: 999;
-}
-
-/* Style for the overlay */
-.overlay {
-  border-radius: 0.5rem;
-  display: none;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  max-width: 75%;
-  max-height: 75%;
-  background: #5B5B5B;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
-  padding: 2rem;
-  border: 2px solid #555;
-  box-shadow: rgba(255, 255, 255, 0.16) 0px 10px 36px 0px, rgba(255, 255, 255, 0.06) 0px 0px 0px 1px;}
-
-/* Style for the enlarged image inside the overlay */
-.overlay img {
-  flex: 1 1 auto;
-  height:90%;
-  max-width: 90%;
-  max-height: 90%;
-}
-
-/* Additional style for close button */
-.overlay .close {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  cursor: pointer;
-  color: var(--main-color);
-  font-size: 20px;
-}

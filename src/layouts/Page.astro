@@ -1,22 +1,23 @@
 ---
-import '../styles/gallery.css';
+import "../styles/gallery.css";
+import Symbols from "../components/Symbols.astro";
+
 const title = "Galeries";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>{title}</title>
-		<link rel="preconnect" href="https://rsms.me/">
-		<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://rsms.me/" />
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
   </head>
-	<body>
-		<h1>{title}</h1>
-		<div class="content">
-			<slot />
-		</div>
-	</body>
+  <body>
+    <Symbols />
+    <h1>{title}</h1>
+      <slot />
+  </body>
 </html>

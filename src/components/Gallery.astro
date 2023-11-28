@@ -1,0 +1,34 @@
+---
+import { getCollection } from "astro:content";
+import Thumbnail from '../components/Thumbnail.astro';
+import { Debug } from 'astro:components';
+
+const allFonts = await getCollection("fonts");
+---
+
+<div class="thumbnails-grid">
+  {
+    allFonts.map((font) => (
+      // <Debug {font} />
+      <Thumbnail font={font}/>
+    ))
+  }
+  </div>
+
+<style>
+  .thumbnails-grid {
+    padding: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+
+  /* Ensure the last line is correctly  aligned
+    by adding an empty element with the same width as other images.
+  */
+  .thumbnails-grid::after {
+    content: "";
+    flex-grow: 999;
+  }
+</style>
+  

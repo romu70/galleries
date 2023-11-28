@@ -1,11 +1,99 @@
 ---
-const {  } = Astro.props;
+import { Image } from 'astro:assets';
+import Date from '../components/Date.astro';
+import Location from '../components/Location.astro';
+
+const { font } = Astro.props;
 ---
 
 <div class="thumbnail">
+  <div class="image">
+    <Image src={font.data.image.file} alt={font.data.image.alt} data-slug={font.slug} />
+  </div>
+  <div class="metadata">
+    <Date date={font.data.pubDate} />
+    <Location node={font.data.node} place={font.data.image.alt + ", " + font.data.place} />
+  </div>
 </div>
+
+<script>
+  // All the process and calculations needed to generate thumbnail which
+  // take into account the widht/height ratio of images.
+  document.addEventListener('DOMContentLoaded', function () {
+    const images = document.querySelectorAll('.image');
+
+    images.forEach(image => {
+      const img = image.querySelector('img');
+
+      if (img.complete) {
+        cropAndPositionImage(image, img);
+      } else {
+        img.addEventListener('load', () => {
+          cropAndPositionImage(image, img);
+        });
+      }
+    });
+  });
+
+  function cropAndPositionImage(container, img) {
+    const imgRatio = img.width / img.height;
+    const containerRatio = container.offsetWidth / container.offsetHeight;
+
+      if (imgRatio > containerRatio) {
+          img.style.width = '100%';
+          img.style.height = 'auto';
+      } else {
+          img.style.width = 'auto';
+          img.style.height = '100%';
+      }
+  }
+
+  // Get all labels
+  const thumbs = document.querySelectorAll('div.image img[data-slug]');
+
+  // Handle clicks on each label.
+  thumbs.forEach((thumb) => {
+    thumb.addEventListener('click', () => {
+
+      // Close all details
+      const items = document.querySelectorAll('div.detail');
+      items.forEach((item) => {
+        item.style.display = 'none';
+      });
+
+      // console.log("Look for: detail-" + thumb.dataset.slug);
+      document.getElementById('detail-' + thumb.dataset.slug).style.display = 'flex';
+    });
+  });
+
+  // Get all close button
+  const closes = document.querySelectorAll('span[data-slug]');
+  // Handle clicks on each button.
+  closes.forEach((close) => {
+    close.addEventListener('click', () => {
+      document.getElementById('detail-' + close.dataset.slug).style.display = 'none';
+    });
+  });
+</script>
 
 <style>
   .thumbnail {
+    flex: 1 1 auto;
+    position: relative;
+    cursor: pointer;
+    width: 20rem;
+    overflow:hidden;
+    margin-bottom: 2rem;
+  }
+
+  .thumbnail .image,
+  .thumbnail .image img {
+    width: 10rem;
+    height: 10rem;
+  }
+
+  .metadata {
+    margin-top: 1rem;
   }
 </style>
+
