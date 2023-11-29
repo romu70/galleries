@@ -13,22 +13,51 @@ const allFonts = await getCollection("fonts");
       <Thumbnail font={font}/>
     ))
   }
-  </div>
+</div>
+
+<script>
+  window.addEventListener("DOMContentLoaded",() => {
+    // const ig = new ImageGrid("#img_grid");
+  });
+</script>
 
 <style>
+
   .thumbnails-grid {
-    padding: 1rem;
+    /* padding: 1rem;
     display: flex;
     flex-wrap: wrap;
-    gap: 2rem;
+    gap: 2rem; */
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    grid-gap: 1em;
+    padding: 1em;
+    width: 100vw;
   }
 
+  @media (min-width: 768px) {
+	.thumbnails-grid {
+		grid-template-columns: repeat(3,1fr);
+	}
+
+  @media (min-width: 1024px) {
+    .thumbnails-grid {
+      grid-template-columns: repeat(4,1fr);
+    }
+  }
+
+  /* Larger Desktop */
+  @media (min-width: 1280px) {
+    .thumbnails-grid {
+      grid-template-columns: repeat(5,1fr);
+    }
+  }
   /* Ensure the last line is correctly  aligned
     by adding an empty element with the same width as other images.
   */
-  .thumbnails-grid::after {
+  /* .thumbnails-grid::after {
     content: "";
     flex-grow: 999;
-  }
+  } */
 </style>
   
