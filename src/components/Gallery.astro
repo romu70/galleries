@@ -24,13 +24,8 @@ const allFonts = await getCollection("fonts");
 <style>
 
   .thumbnails-grid {
-    /* padding: 1rem;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem; */
     display: grid;
     grid-template-columns: repeat(2,1fr);
-    grid-gap: 1em;
     padding: 1em;
     width: 100vw;
   }
@@ -46,12 +41,12 @@ const allFonts = await getCollection("fonts");
     }
   }
 
-  /* Larger Desktop */
   @media (min-width: 1280px) {
     .thumbnails-grid {
       grid-template-columns: repeat(5,1fr);
     }
   }
+
   /* Ensure the last line is correctly  aligned
     by adding an empty element with the same width as other images.
   */
