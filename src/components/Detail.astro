@@ -1,13 +1,167 @@
 ---
-const {  } = Astro.props;
+import { Image } from 'astro:assets';
+import Date from '../components/Date.astro';
+import Location from '../components/Location.astro';
+
+const { image, alt, index, name } = Astro.props;
 ---
 
-<div class="detail">
-  DETAIL DETAIL DETAILS
+<div class="detail" data-open="false">
+  <div class="detail-left">
+    <img id="detail-img" src="{image}" alt="{alt}" data-index="{index}" />
+  </div>
+  <div class="detail-right">
+    <button class="button" id="close-btn" type="button" aria-label="Close" data-action="close">
+      <svg class="close-svg" width="20px" height="20px">
+        <use xlink:href="#close" />
+      </svg>
+    </button>
+    <div class="info">
+      <span id="detail-title">"{name}"</span>
+      <span id="detail-pub-date">"{name}"</span>
+    </div>
+    <div class="buttons">
+      <button class="button" id="prev-btn" type="button" aria-label="Previous" data-action="prev" disabled>
+        <svg class="arrow-svg" width="20px" height="20px">
+          <use xlink:href="#left" />
+        </svg>
+      </button>
+      <button class="button" id="next-btn" type="button" aria-label="Next" data-action="next">
+        <svg class="arrow-svg" width="20px" height="20px">
+          <use xlink:href="#right" />
+        </svg>
+      </button>
+    </div>
+    </div>
 </div>
+
+<script>
+</script>
 
 <style>
   .detail {
-    display: none;
+    display: flex;
+  	flex-direction: column;
+    grid-column: 1 / -1;
+    color: white;
+    padding: 2rem;
+    background-color: rgba(245, 222, 179, 0.1);
+    /* display: none; */
+    position: fixed;
+    inset: 0;
+    transition: background-color var(--transDur);
+    z-index: 1;
   }
+
+  .detail[data-open="false"] {
+	  display: none;
+  }
+
+  .detail-left {
+    margin: auto 0;
+  }
+
+  #detail-img {
+    display: block;
+    margin: auto;
+    height: auto;
+    width: 100%;
+  }
+
+  .detail-right {
+    background-color: hsl(var(--hue),10%,15%);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    justify-content: space-between;
+    padding: 1em;
+  }
+
+  .info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .buttons {
+    display:flex;
+		justify-content: flex-end;
+  }
+
+  #close-btn:focus,
+  .button:focus {
+    outline: transparent;
+  }
+
+  #close-btn {
+    background: transparent;
+    color: hsl(var(--hue),10%,70%);
+    align-self: flex-end;
+    position: absolute;
+    top: 1em;
+    right: 1em;
+    width: 0.75em;
+    height: 0.75em;
+  }
+
+  #close-btn:focus,
+  #close-btn:hover {
+    color: hsl(var(--hue),10%,90%);
+  }
+
+  .button {
+    display: block;
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
+  }
+
+  @supports selector(:focus-visible) {
+    .button:focus {
+      color: hsl(var(--hue),10%,70%);
+    }
+    .button:focus-visible,
+    .button:hover,
+    .button:not(:disabled):hover {
+      color: hsl(var(--hue),10%,90%);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .detail {
+      flex-direction: row;
+      height: 10em;
+      margin: 1rem -1rem;
+      padding: 1em;
+      position: static;
+    }
+
+    .detail-left,
+    .detail-right {
+      flex: 1;
+    }
+    .detail-left {
+      flex: 2;
+      margin: 0;
+      max-width: 60%;
+    }
+
+    .detail-right {
+      background-color: transparent;
+      padding: 0 0 0 1em;
+    }
+
+    .detail-left,
+    .detail-img {
+      height: 100%;
+      width: auto;
+    }
+
+    #close-btn {
+      position: static;
+    }
+    .img-grid__detail-pane-info {
+      display: block;
+    }
+  }
+
 </style>

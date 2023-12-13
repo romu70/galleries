@@ -1,34 +1,183 @@
 ---
 import { getCollection } from "astro:content";
 import Thumbnail from '../components/Thumbnail.astro';
+import Detail from '../components/Detail.astro';
 import { Debug } from 'astro:components';
 
 const allFonts = await getCollection("fonts");
 ---
 
 <div class="thumbnails-grid">
+  <Detail />
   {
-    allFonts.map((font) => (
+    allFonts.map((font, index) => (
       // <Debug {font} />
-      <Thumbnail font={font}/>
+      <Thumbnail font={font} index={index}/>
     ))
   }
 </div>
 
 <script>
+  let grid = null;
+  let detailPane = null;
+  let detailPaneOpen = true;
+  let currentImage = 0;
+  let images = 10;
+
   window.addEventListener("DOMContentLoaded",() => {
-    // const ig = new ImageGrid("#img_grid");
+    grid = document.querySelector(".thumbnails-grid");
+    detailPane = grid?.firstElementChild;
+    updateView();
+
+    grid?.addEventListener("click", callback);
+    grid?.addEventListener("keydown", callback);
   });
+
+  function updateView() {
+    const index = currentImage;
+    detailPane?.setAttribute("data-open", detailPaneOpen.toString());
+
+    // change its DOM location
+    const minWidths = [360, 768, 1024, 1280];
+    const matchedWidths = minWidths.filter(width => {
+      const mediaQuery = window.matchMedia(`(min-width: ${width}px)`);
+      return mediaQuery.matches;
+    });
+
+// TODO : to be reworked by getting directly the item index in the content collection
+    const imagesPerRow = 1 + matchedWidths.length;
+    const moveToRow = 1 + Math.ceil((index + 1) / imagesPerRow);
+    detailPane.style.gridRow = moveToRow;
+
+    // All thumbs
+    const paneThumbBtns = grid.querySelectorAll(`.thumbnail`);
+    // Add the active class on the currently open thumb,
+    // and remove it from the oother thumbs.
+    Array.from(paneThumbBtns).forEach((btn, i) => {
+      const activeClass = "active";
+
+      if (i === index && detailPaneOpen)
+        btn.classList.add(activeClass);
+      else
+        btn.classList.remove(activeClass);
+    });
+
+    const detailImage = document.getElementById(`detail-img`);
+    const currentThumb = grid.querySelector(`[data-index="${index}"]`);
+    // Get current thumb image
+    const currentThumbImage = currentThumb.children[0].children[0];
+
+    // update the src of the detail pane image object
+    if (detailImage && currentThumbImage) {
+      detailImage.src = currentThumbImage.src;
+    }
+
+    const detailTitle = document.getElementById(`detail-title`);
+    if (detailTitle) {
+      detailTitle.textContent = currentThumb.children[1].children[1].children[0].textContent;
+    }
+
+    const detailPubDate = document.getElementById(`detail-pub-date`);
+    if (detailPubDate) {
+      detailPubDate.textContent = currentThumb.children[1].children[0].children[1].textContent;
+    }
+
+    const prevButton = document.getElementById(`prev-btn`);
+    if (prevButton)
+      prevButton.disabled = index === 0;
+
+    // disable the right arrow if on the last image
+    const nextButton = document.getElementById(`next-btn`);
+    if (nextButton)
+      nextButton.disabled = images < 2 || index === images - 1;
+  }
+
+  function closeDetailPane() {
+    detailPaneOpen = false;
+  }
+
+  function openDetailPane(imageID) {
+    detailPaneOpen = true;
+    currentImage = imageID;
+  }
+
+  function prev() {
+    --currentImage;
+
+    if (currentImage < 0)
+      currentImage = 0;
+  }
+
+  function next() {
+    console.log("--next");
+    ++currentImage;
+
+    if (images < 2)
+      currentImage = 0;
+    else if (currentImage === images)
+      currentImage = images - 1;
+  }
+
+  function callback(e) {
+    const { key, shiftKey, target } = e;
+    const action = target.getAttribute("data-action");
+    const index = +target.parentNode.getAttribute("data-index");
+    console.log(target);
+    console.log(action);
+
+    ////// Keyboard management ///////
+    if (key !== "Tab" && !shiftKey) {
+      // open the pane (or close if clicking the thumb)
+      if (!key && action === "open") {
+        if (index === currentImage && detailPaneOpen)
+          closeDetailPane();
+        else
+          openDetailPane(index);
+
+      // close the pane
+      } else if (key === "Escape" || action === "close") {
+        closeDetailPane();
+
+      // previous image
+      } else if (key === "ArrowLeft" || (!key && action === "prev")) {
+        prev();
+
+      // next image
+      } else if (key === "ArrowRight" || (!key && action === "next")) {
+        next();
+      }
+
+      updateView();
+      moveFocus(target, action);
+    }
+  }
+
+  function moveFocus(target, action) {
+    if(action === "prev" || action === "next") {
+      if (target.disabled) {
+        const btn = action + "-btn";
+        document.getElementById(btn)?.focus();
+      } else {
+        target.focus();
+      }
+    }
+  }
+
 </script>
 
 <style>
 
   .thumbnails-grid {
     display: grid;
-    grid-template-columns: repeat(2,1fr);
+    grid-template-columns: repeat(1,1fr);
     padding: 1em;
     width: 100vw;
   }
+
+  @media (min-width: 360px) {
+	.thumbnails-grid {
+		grid-template-columns: repeat(2,1fr);
+	}
 
   @media (min-width: 768px) {
 	.thumbnails-grid {
