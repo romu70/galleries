@@ -63,7 +63,7 @@ const { font, index } = Astro.props;
   }
 
   .thumbnail:hover {
-    background-color: rgba(245, 222, 179, 0.3);
+    background-color: var(--active-background-color);
   }
 
   .thumbnail .image {
@@ -86,7 +86,8 @@ const { font, index } = Astro.props;
   }
 
   .thumbnail.active {
-    border: 2px solid rgba(245, 222, 179);
+    /* border: 2px solid rgba(245, 222, 179); */
+    background-color: var(--active-background-color);
   }
 
   .metadata {

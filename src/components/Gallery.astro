@@ -7,7 +7,7 @@ import { Debug } from 'astro:components';
 const allFonts = await getCollection("fonts");
 ---
 
-<div class="thumbnails-grid">
+<div class="thumbnails-grid" id="thumbnails-grid">
   <Detail />
   {
     allFonts.map((font, index) => (
@@ -22,10 +22,10 @@ const allFonts = await getCollection("fonts");
   let detailPane = null;
   let detailPaneOpen = true;
   let currentImage = 0;
-  let images = 10;
+  let images = 5;
 
   window.addEventListener("DOMContentLoaded",() => {
-    grid = document.querySelector(".thumbnails-grid");
+    grid = document.querySelector("#thumbnails-grid");
     detailPane = grid?.firstElementChild;
     updateView();
 
@@ -99,6 +99,8 @@ const allFonts = await getCollection("fonts");
   function openDetailPane(imageID) {
     detailPaneOpen = true;
     currentImage = imageID;
+    if(detailPane !== null)
+        detailPane.style.display = 'flex';
   }
 
   function prev() {
@@ -109,7 +111,6 @@ const allFonts = await getCollection("fonts");
   }
 
   function next() {
-    console.log("--next");
     ++currentImage;
 
     if (images < 2)
@@ -119,11 +120,12 @@ const allFonts = await getCollection("fonts");
   }
 
   function callback(e) {
+
     const { key, shiftKey, target } = e;
     const action = target.getAttribute("data-action");
     const index = +target.parentNode.getAttribute("data-index");
-    console.log(target);
-    console.log(action);
+    // console.log(target);
+    // console.log(action);
 
     ////// Keyboard management ///////
     if (key !== "Tab" && !shiftKey) {

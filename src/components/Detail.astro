@@ -11,7 +11,7 @@ const { image, alt, index, name } = Astro.props;
     <img id="detail-img" src="{image}" alt="{alt}" data-index="{index}" />
   </div>
   <div class="detail-right">
-    <button class="button" id="close-btn" type="button" aria-label="Close" data-action="close">
+    <button class="button" id="close-btn" type="button" aria-label="Close" data-action="close" onclick="closeDetailPane()">
       <svg class="close-svg" width="20px" height="20px">
         <use xlink:href="#close" />
       </svg>
@@ -35,7 +35,12 @@ const { image, alt, index, name } = Astro.props;
     </div>
 </div>
 
-<script>
+<script is:inline>
+  function closeDetailPane() {
+    console.log("ma fonction");
+    const pane = document.getElementsByClassName(`detail`);
+    pane[0].style.display = "none";
+  }
 </script>
 
 <style>
@@ -45,7 +50,7 @@ const { image, alt, index, name } = Astro.props;
     grid-column: 1 / -1;
     color: white;
     padding: 2rem;
-    background-color: rgba(245, 222, 179, 0.1);
+    background-color: var(--active-background-color);
     /* display: none; */
     position: fixed;
     inset: 0;
@@ -87,10 +92,10 @@ const { image, alt, index, name } = Astro.props;
 		justify-content: flex-end;
   }
 
-  #close-btn:focus,
-  .button:focus {
+  /* #close-btn:focus, */
+  /* button:focus {
     outline: transparent;
-  }
+  } */
 
   #close-btn {
     background: transparent;
@@ -99,8 +104,8 @@ const { image, alt, index, name } = Astro.props;
     position: absolute;
     top: 1em;
     right: 1em;
-    width: 0.75em;
-    height: 0.75em;
+    width: 2rem;
+    height: 2rem;
   }
 
   #close-btn:focus,
@@ -108,9 +113,8 @@ const { image, alt, index, name } = Astro.props;
     color: hsl(var(--hue),10%,90%);
   }
 
-  .button {
+  button {
     display: block;
-    pointer-events: none;
     width: 100%;
     height: 100%;
   }
@@ -130,7 +134,7 @@ const { image, alt, index, name } = Astro.props;
     .detail {
       flex-direction: row;
       height: 10em;
-      margin: 1rem -1rem;
+      margin: 0rem -1rem;
       padding: 1em;
       position: static;
     }
