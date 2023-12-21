@@ -3,45 +3,39 @@ import { Image } from 'astro:assets';
 import Date from '../components/Date.astro';
 import Location from '../components/Location.astro';
 
-const { image, alt, index, name } = Astro.props;
+const { font, index } = Astro.props;
 ---
 
-<div class="detail" data-open="false">
+<div class="detail" data-index={index}>
   <div class="detail-left">
-    <img id="detail-img" src="{image}" alt="{alt}" data-index="{index}" />
+    DETAIL VIEW LEFT
+    <!-- <img id="detail-img" src="{image}" alt="{alt}" data-index="{index}" /> -->
   </div>
   <div class="detail-right">
-    <button class="button" id="close-btn" type="button" aria-label="Close" data-action="close" onclick="closeDetailPane()">
+    DETAIL VIEW RIGHT
+    <button class="close-button" type="button" aria-label="Close" >
       <svg class="close-svg" width="20px" height="20px">
         <use xlink:href="#close" />
       </svg>
     </button>
-    <div class="info">
+    <!-- <div class="info">
       <span id="detail-title">"{name}"</span>
       <span id="detail-pub-date">"{name}"</span>
-    </div>
+    </div> -->
     <div class="buttons">
-      <button class="button" id="prev-btn" type="button" aria-label="Previous" data-action="prev" disabled>
+      <button class="previous-button" type="button" aria-label="Previous" disabled>
         <svg class="arrow-svg" width="20px" height="20px">
           <use xlink:href="#left" />
         </svg>
       </button>
-      <button class="button" id="next-btn" type="button" aria-label="Next" data-action="next">
+      <button class="next-button" type="button" aria-label="Next">
         <svg class="arrow-svg" width="20px" height="20px">
           <use xlink:href="#right" />
         </svg>
       </button>
     </div>
-    </div>
+  </div>
 </div>
-
-<script is:inline>
-  function closeDetailPane() {
-    console.log("ma fonction");
-    const pane = document.getElementsByClassName(`detail`);
-    pane[0].style.display = "none";
-  }
-</script>
 
 <style>
   .detail {

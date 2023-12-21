@@ -37,3 +37,6 @@ h1 {
   color:var(--main-color)
 }
 
+svg, svg symbol {
+  pointer-events: none;
+}

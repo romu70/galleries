@@ -6,11 +6,11 @@ import { Debug } from 'astro:components';
 
 const { font, index } = Astro.props;
 ---
-<div class="thumbnail" data-index={index} >
-  <div class="image" data-action="open">
-    <Image src={font.data.image.file} alt={font.data.image.alt} data-slug={font.slug} />
+<div class="thumbnail" data-index={index}>
+  <div class="thumbnail-image" >
+    <Image src={font.data.image.file} alt={font.data.image.alt} />
   </div>
-  <div class="metadata">
+  <div class="thumbnail-metadata">
     <Date date={font.data.pubDate} />
     <Location node={font.data.node} place={font.data.image.alt + ", " + font.data.place} />
   </div>
@@ -20,7 +20,7 @@ const { font, index } = Astro.props;
   // All the process and calculations needed to generate thumbnail which
   // take into account the widht/height ratio of images.
   document.addEventListener('DOMContentLoaded', function () {
-    const images = document.querySelectorAll('.image img');
+    const images = document.querySelectorAll('.thumbnail-image img');
     images.forEach(image => {
 
       if (image.complete) {
@@ -48,11 +48,12 @@ const { font, index } = Astro.props;
         img.style.height = '100%';
     }
   };
+
 </script>
 
 <style>
   .thumbnail,
-  .thumbnail .image {
+  .thumbnail-image {
     position: relative;
   }
 
@@ -66,7 +67,7 @@ const { font, index } = Astro.props;
     background-color: var(--active-background-color);
   }
 
-  .thumbnail .image {
+  .thumbnail .thumbnail-image {
     aspect-ratio: var(--aspect-ratio);
     display: block;
     width: 100%;
@@ -75,7 +76,7 @@ const { font, index } = Astro.props;
     position: relative;
   }
   
-  .thumbnail .image img {
+  .thumbnail .thumbnail-image img {
     display: block;
     position: absolute;
     pointer-events: none;
@@ -91,12 +92,12 @@ const { font, index } = Astro.props;
   }
 
   .metadata {
-    /* position: absolute;
+    position: absolute;
     right: 0;
     bottom: 0;
     left: 0;
     height: 1.5em;
-    padding-top: 0.25em; */
+    padding-top: 0.25em;
   }
 </style>
 

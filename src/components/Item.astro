@@ -1,0 +1,18 @@
+---
+import Thumbnail from '../components/Thumbnail.astro';
+import Detail from '../components/Detail.astro';
+import { Debug } from 'astro:components';
+
+const { font, index } = Astro.props;
+---
+<div class="item" data-index={index} >
+  <Thumbnail font={font} index={index} />
+  <Detail font={font} index={index} />
+</div>
+
+<script>
+</script>
+
+<style>
+</style>
+

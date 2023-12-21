@@ -1,175 +1,258 @@
 ---
 import { getCollection } from "astro:content";
-import Thumbnail from '../components/Thumbnail.astro';
-import Detail from '../components/Detail.astro';
+import Item from '../components/Item.astro';
+// import Thumbnail from '../components/Thumbnail.astro';
+// import Detail from '../components/Detail.astro';
 import { Debug } from 'astro:components';
 
 const allFonts = await getCollection("fonts");
 ---
 
-<div class="thumbnails-grid" id="thumbnails-grid">
-  <Detail />
+<div class="items-grid" id="items-grid">
+  <!-- <Detail /> -->
   {
     allFonts.map((font, index) => (
       // <Debug {font} />
-      <Thumbnail font={font} index={index}/>
+      <Item font={font} index={index}/>
     ))
   }
 </div>
 
 <script>
-  let grid = null;
-  let detailPane = null;
-  let detailPaneOpen = true;
-  let currentImage = 0;
-  let images = 5;
+  let grid: Element | null = null;
+  type Divs = NodeListOf<HTMLElement> | null | undefined;
+  type Div = HTMLElement | null | undefined;
+  let thumbnails: Divs = null;
+  let details: Divs = null;
+  let currentShownDetail: Div = null;
 
-  window.addEventListener("DOMContentLoaded",() => {
-    grid = document.querySelector("#thumbnails-grid");
-    detailPane = grid?.firstElementChild;
-    updateView();
-
-    grid?.addEventListener("click", callback);
-    grid?.addEventListener("keydown", callback);
+  // Init
+  document.addEventListener('DOMContentLoaded', function () {
+    grid = document.querySelector("#items-grid");
+    thumbnails = grid?.querySelectorAll('.thumbnail');
+    details = grid?.querySelectorAll('.detail');
+    hideAllDetails();
+    addThumbnailImageClick();
+    addDetailClick('.close-button', onDetailCloseClick);
+    addDetailClick('.next-button', onDetailNextClick);
+    addDetailClick('.previous-button', onDetailPreviousClick);
   });
 
-  function updateView() {
-    const index = currentImage;
-    detailPane?.setAttribute("data-open", detailPaneOpen.toString());
-
-    // change its DOM location
-    const minWidths = [360, 768, 1024, 1280];
-    const matchedWidths = minWidths.filter(width => {
-      const mediaQuery = window.matchMedia(`(min-width: ${width}px)`);
-      return mediaQuery.matches;
+  function addThumbnailImageClick() {
+    thumbnails?.forEach(thumbnail => {
+      thumbnail.children[0].addEventListener('click', onThumbnailImageClick);
     });
+  }
+
+  function addDetailClick(clazz, callback) {
+    let buttons = grid?.querySelectorAll(clazz);
+    buttons?.forEach(button => {
+      button.addEventListener('click', callback);
+    });
+  }
+  
+  function hideAllDetails() {
+    details?.forEach(detail => {
+      detail.style.visibility = "collapse";
+    });
+  }
+
+  function hideDetail(detail: Div) {
+    if(detail != null) {
+      detail.style.visibility = "collapse";
+      currentShownDetail = null;
+    }
+  }
+
+  function showDetail(detail: Div) {
+    if(detail != null) {
+      detail.style.visibility = "visible";
+      currentShownDetail = detail;
+    }
+  }
+
+  function onThumbnailImageClick(e) {
+    // Get the clicked detail element
+    let index = e.target.parentNode.dataset.index;
+    let detail: Div = grid?.querySelector(`.detail[data-index="${index}"]`);
+
+    // If the already open item is clicked,
+    // then it's closed
+    if(currentShownDetail == detail) {
+      hideDetail(currentShownDetail);
+    }
+    else {
+      // If another item is clicked,
+      // we close the already open one and then
+      // we open the new one
+      hideDetail(currentShownDetail);
+      showDetail(detail);
+    }
+  }
+
+  function onDetailCloseClick(e) {
+    hideDetail(e.target.parentNode.parentNode);
+  }
+
+  function onDetailNextClick(e) {
+    console.log("onDetailNextClick: " + e.target);
+  }
+
+  function onDetailPreviousClick(e) {
+    console.log("onDetailPrevClick: " + e.target);
+  }
+
+  // let detailPane = null;
+  // let detailPaneOpen = true;
+  // let currentImage = 0;
+  // let images = 5;
+
+  // window.addEventListener("DOMContentLoaded",() => {
+  //   grid = document.querySelector("#items-grid");
+  //   detailPane = grid?.firstElementChild;
+  //   updateView();
+
+  //   grid?.addEventListener("click", callback);
+  //   grid?.addEventListener("keydown", callback);
+  // });
+
+  // function updateView() {
+  //   const index = currentImage;
+  //   detailPane?.setAttribute("data-open", detailPaneOpen.toString());
+
+  //   // change its DOM location
+  //   const minWidths = [360, 768, 1024, 1280];
+  //   const matchedWidths = minWidths.filter(width => {
+  //     const mediaQuery = window.matchMedia(`(min-width: ${width}px)`);
+  //     return mediaQuery.matches;
+  //   });
 
 // TODO : to be reworked by getting directly the item index in the content collection
-    const imagesPerRow = 1 + matchedWidths.length;
-    const moveToRow = 1 + Math.ceil((index + 1) / imagesPerRow);
-    detailPane.style.gridRow = moveToRow;
+    // const imagesPerRow = 1 + matchedWidths.length;
+    // const moveToRow = 1 + Math.ceil((index + 1) / imagesPerRow);
+    // detailPane.style.gridRow = moveToRow;
 
-    // All thumbs
-    const paneThumbBtns = grid.querySelectorAll(`.thumbnail`);
-    // Add the active class on the currently open thumb,
-    // and remove it from the oother thumbs.
-    Array.from(paneThumbBtns).forEach((btn, i) => {
-      const activeClass = "active";
+    // // All thumbs
+    // const paneThumbBtns = grid.querySelectorAll(`.thumbnail`);
+    // // Add the active class on the currently open thumb,
+    // // and remove it from the oother thumbs.
+    // Array.from(paneThumbBtns).forEach((btn, i) => {
+    //   const activeClass = "active";
 
-      if (i === index && detailPaneOpen)
-        btn.classList.add(activeClass);
-      else
-        btn.classList.remove(activeClass);
-    });
+    //   if (i === index && detailPaneOpen)
+    //     btn.classList.add(activeClass);
+    //   else
+    //     btn.classList.remove(activeClass);
+    // });
 
-    const detailImage = document.getElementById(`detail-img`);
-    const currentThumb = grid.querySelector(`[data-index="${index}"]`);
-    // Get current thumb image
-    const currentThumbImage = currentThumb.children[0].children[0];
+    // const detailImage = document.getElementById(`detail-img`);
+    // const currentThumb = grid.querySelector(`[data-index="${index}"]`);
+    // // Get current thumb image
+    // const currentThumbImage = currentThumb.children[0].children[0];
 
     // update the src of the detail pane image object
-    if (detailImage && currentThumbImage) {
-      detailImage.src = currentThumbImage.src;
-    }
+    // if (detailImage && currentThumbImage) {
+    //   detailImage.src = currentThumbImage.src;
+    // }
 
-    const detailTitle = document.getElementById(`detail-title`);
-    if (detailTitle) {
-      detailTitle.textContent = currentThumb.children[1].children[1].children[0].textContent;
-    }
+    // const detailTitle = document.getElementById(`detail-title`);
+    // if (detailTitle) {
+    //   detailTitle.textContent = currentThumb.children[1].children[1].children[0].textContent;
+    // }
 
-    const detailPubDate = document.getElementById(`detail-pub-date`);
-    if (detailPubDate) {
-      detailPubDate.textContent = currentThumb.children[1].children[0].children[1].textContent;
-    }
+    // const detailPubDate = document.getElementById(`detail-pub-date`);
+    // if (detailPubDate) {
+    //   detailPubDate.textContent = currentThumb.children[1].children[0].children[1].textContent;
+    // }
 
-    const prevButton = document.getElementById(`prev-btn`);
-    if (prevButton)
-      prevButton.disabled = index === 0;
+    // const prevButton = document.getElementById(`prev-btn`);
+    // if (prevButton)
+    //   prevButton.disabled = index === 0;
 
     // disable the right arrow if on the last image
-    const nextButton = document.getElementById(`next-btn`);
-    if (nextButton)
-      nextButton.disabled = images < 2 || index === images - 1;
-  }
+  //   const nextButton = document.getElementById(`next-btn`);
+  //   if (nextButton)
+  //     nextButton.disabled = images < 2 || index === images - 1;
+  // }
 
-  function closeDetailPane() {
-    detailPaneOpen = false;
-  }
+  // function closeDetailPane() {
+  //   detailPaneOpen = false;
+  // }
 
-  function openDetailPane(imageID) {
-    detailPaneOpen = true;
-    currentImage = imageID;
-    if(detailPane !== null)
-        detailPane.style.display = 'flex';
-  }
+  // function openDetailPane(imageID) {
+  //   detailPaneOpen = true;
+  //   currentImage = imageID;
+  //   if(detailPane !== null)
+  //       detailPane.style.display = 'flex';
+  // }
 
-  function prev() {
-    --currentImage;
+  // function prev() {
+  //   --currentImage;
 
-    if (currentImage < 0)
-      currentImage = 0;
-  }
+  //   if (currentImage < 0)
+  //     currentImage = 0;
+  // }
 
-  function next() {
-    ++currentImage;
+  // function next() {
+  //   ++currentImage;
 
-    if (images < 2)
-      currentImage = 0;
-    else if (currentImage === images)
-      currentImage = images - 1;
-  }
+  //   if (images < 2)
+  //     currentImage = 0;
+  //   else if (currentImage === images)
+  //     currentImage = images - 1;
+  // }
 
-  function callback(e) {
+  // function callback(e) {
 
-    const { key, shiftKey, target } = e;
-    const action = target.getAttribute("data-action");
-    const index = +target.parentNode.getAttribute("data-index");
-    // console.log(target);
-    // console.log(action);
+  //   const { key, shiftKey, target } = e;
+  //   const action = target.getAttribute("data-action");
+  //   const index = +target.parentNode.getAttribute("data-index");
+  //   // console.log(target);
+  //   // console.log(action);
 
-    ////// Keyboard management ///////
-    if (key !== "Tab" && !shiftKey) {
-      // open the pane (or close if clicking the thumb)
-      if (!key && action === "open") {
-        if (index === currentImage && detailPaneOpen)
-          closeDetailPane();
-        else
-          openDetailPane(index);
+  //   ////// Keyboard management ///////
+  //   if (key !== "Tab" && !shiftKey) {
+  //     // open the pane (or close if clicking the thumb)
+  //     if (!key && action === "open") {
+  //       if (index === currentImage && detailPaneOpen)
+  //         closeDetailPane();
+  //       else
+  //         openDetailPane(index);
 
-      // close the pane
-      } else if (key === "Escape" || action === "close") {
-        closeDetailPane();
+  //     // close the pane
+  //     } else if (key === "Escape" || action === "close") {
+  //       closeDetailPane();
 
-      // previous image
-      } else if (key === "ArrowLeft" || (!key && action === "prev")) {
-        prev();
+  //     // previous image
+  //     } else if (key === "ArrowLeft" || (!key && action === "prev")) {
+  //       prev();
 
-      // next image
-      } else if (key === "ArrowRight" || (!key && action === "next")) {
-        next();
-      }
+  //     // next image
+  //     } else if (key === "ArrowRight" || (!key && action === "next")) {
+  //       next();
+  //     }
 
-      updateView();
-      moveFocus(target, action);
-    }
-  }
+  //     updateView();
+  //     moveFocus(target, action);
+  //   }
+  // }
 
-  function moveFocus(target, action) {
-    if(action === "prev" || action === "next") {
-      if (target.disabled) {
-        const btn = action + "-btn";
-        document.getElementById(btn)?.focus();
-      } else {
-        target.focus();
-      }
-    }
-  }
+  // function moveFocus(target, action) {
+  //   if(action === "prev" || action === "next") {
+  //     if (target.disabled) {
+  //       const btn = action + "-btn";
+  //       document.getElementById(btn)?.focus();
+  //     } else {
+  //       target.focus();
+  //     }
+  //   }
+  // }
 
 </script>
 
 <style>
 
-  .thumbnails-grid {
+  .items-grid {
     display: grid;
     grid-template-columns: repeat(1,1fr);
     padding: 1em;
@@ -177,23 +260,23 @@ const allFonts = await getCollection("fonts");
   }
 
   @media (min-width: 360px) {
-	.thumbnails-grid {
+	.items-grid {
 		grid-template-columns: repeat(2,1fr);
 	}
 
   @media (min-width: 768px) {
-	.thumbnails-grid {
+	.items-grid {
 		grid-template-columns: repeat(3,1fr);
 	}
 
   @media (min-width: 1024px) {
-    .thumbnails-grid {
+    .items-grid {
       grid-template-columns: repeat(4,1fr);
     }
   }
 
   @media (min-width: 1280px) {
-    .thumbnails-grid {
+    .items-grid {
       grid-template-columns: repeat(5,1fr);
     }
   }
@@ -201,7 +284,7 @@ const allFonts = await getCollection("fonts");
   /* Ensure the last line is correctly  aligned
     by adding an empty element with the same width as other images.
   */
-  /* .thumbnails-grid::after {
+  /* .items-grid::after {
     content: "";
     flex-grow: 999;
   } */
