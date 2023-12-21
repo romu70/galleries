@@ -61,6 +61,8 @@ const allFonts = await getCollection("fonts");
     if(detail != null) {
       detail.style.visibility = "collapse";
       currentShownDetail = null;
+      let thumbnail: Div = grid?.querySelector(`.thumbnail[data-index="${detail.dataset.index}"]`);
+      markThumbnailInactive(thumbnail);
     }
   }
 
@@ -68,6 +70,8 @@ const allFonts = await getCollection("fonts");
     if(detail != null) {
       detail.style.visibility = "visible";
       currentShownDetail = detail;
+      let thumbnail: Div = grid?.querySelector(`.thumbnail[data-index="${detail.dataset.index}"]`);
+      markThumbnailActive(thumbnail);
     }
   }
 
@@ -88,6 +92,14 @@ const allFonts = await getCollection("fonts");
       hideDetail(currentShownDetail);
       showDetail(detail);
     }
+  }
+
+  function markThumbnailActive(thumbnail: Div) {
+    thumbnail?.classList.add("active");
+  }
+
+  function markThumbnailInactive(thumbnail: Div) {
+    thumbnail?.classList.remove("active");
   }
 
   function onDetailCloseClick(e) {
