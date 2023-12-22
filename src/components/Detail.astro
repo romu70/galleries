@@ -23,12 +23,12 @@ const { font, index } = Astro.props;
       <span id="detail-pub-date">"{name}"</span>
     </div> -->
     <div class="buttons">
-      <button class="previous-button" type="button" aria-label="Previous" disabled>
+      <button class="previous-button" type="button" aria-label="Previous" data-index={index} disabled>
         <svg class="arrow-svg" width="20px" height="20px">
           <use xlink:href="#left" />
         </svg>
       </button>
-      <button class="next-button" type="button" aria-label="Next">
+      <button class="next-button" type="button" aria-label="Next" data-index={index}>
         <svg class="arrow-svg" width="20px" height="20px">
           <use xlink:href="#right" />
         </svg>

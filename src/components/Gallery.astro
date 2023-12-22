@@ -72,12 +72,18 @@ const allFonts = await getCollection("fonts");
       currentShownDetail = detail;
       let thumbnail: Div = grid?.querySelector(`.thumbnail[data-index="${detail.dataset.index}"]`);
       markThumbnailActive(thumbnail);
+      console.log("current index: " + detail.dataset.index);
     }
   }
 
   function onThumbnailImageClick(e) {
+    processImage(e.target.parentNode.dataset.index);
+  }
+
+  function processImage(index) {
+    console.log("processImage: " + index);
+    
     // Get the clicked detail element
-    let index = e.target.parentNode.dataset.index;
     let detail: Div = grid?.querySelector(`.detail[data-index="${index}"]`);
 
     // If the already open item is clicked,
@@ -99,7 +105,7 @@ const allFonts = await getCollection("fonts");
       }
 
       // Set active the next button if the index is > 0
-      if(index == (thumbnails?.length - 1)) {
+      if(thumbnails && index == (thumbnails?.length - 1)) {
         let button = grid?.querySelector(`.detail[data-index="${index}"] .next-button`);
         button?.setAttribute("disabled", "");
       }
@@ -119,13 +125,13 @@ const allFonts = await getCollection("fonts");
   }
 
   function onDetailNextClick(e) {
-    console.log("onDetailNextClick: ");
-    console.log(e.target.parentNode.parentNode.parentNode.dataset.index);
+    let idx = parseInt(e.target.dataset.index) + 1;
+    processImage(idx)
   }
 
   function onDetailPreviousClick(e) {
-    console.log("onDetailPrevClick: ");
-    console.log(e.target.parentNode.parentNode.parentNode.dataset.index);
+    let idx = parseInt(e.target.dataset.index) - 1;
+    processImage(idx)
   }
 
   // let detailPane = null;
