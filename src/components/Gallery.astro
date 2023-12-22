@@ -91,6 +91,18 @@ const allFonts = await getCollection("fonts");
       // we open the new one
       hideDetail(currentShownDetail);
       showDetail(detail);
+
+      // Set active the previous button if the index is > 0
+      if(index > 0) {
+        let button = grid?.querySelector(`.detail[data-index="${index}"] .previous-button`);
+        button?.removeAttribute("disabled");
+      }
+
+      // Set active the next button if the index is > 0
+      if(index == (thumbnails?.length - 1)) {
+        let button = grid?.querySelector(`.detail[data-index="${index}"] .next-button`);
+        button?.setAttribute("disabled", "");
+      }
     }
   }
 
@@ -107,11 +119,13 @@ const allFonts = await getCollection("fonts");
   }
 
   function onDetailNextClick(e) {
-    console.log("onDetailNextClick: " + e.target);
+    console.log("onDetailNextClick: ");
+    console.log(e.target.parentNode.parentNode.parentNode.dataset.index);
   }
 
   function onDetailPreviousClick(e) {
-    console.log("onDetailPrevClick: " + e.target);
+    console.log("onDetailPrevClick: ");
+    console.log(e.target.parentNode.parentNode.parentNode.dataset.index);
   }
 
   // let detailPane = null;
