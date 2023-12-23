@@ -68,11 +68,16 @@ const allFonts = await getCollection("fonts");
 
   function showDetail(detail: Div) {
     if(detail != null) {
-      detail.style.visibility = "visible";
-      currentShownDetail = detail;
       let thumbnail: Div = grid?.querySelector(`.thumbnail[data-index="${detail.dataset.index}"]`);
       markThumbnailActive(thumbnail);
-      console.log("current index: " + detail.dataset.index);
+      let top = thumbnail ? thumbnail.getBoundingClientRect()["bottom"] : 0;
+
+      // Respect the media query. If width < 768, the detail is full screen,
+      // if not, it's below the thumbnail
+      window.innerWidth < 768 ? detail.style.top = "0" : detail.style.top = top.toString() + "px";
+      console.log(window.innerWidth);
+      detail.style.visibility = "visible";
+      currentShownDetail = detail;
     }
   }
 
@@ -80,9 +85,7 @@ const allFonts = await getCollection("fonts");
     processImage(e.target.parentNode.dataset.index);
   }
 
-  function processImage(index) {
-    console.log("processImage: " + index);
-    
+  function processImage(index: number) {
     // Get the clicked detail element
     let detail: Div = grid?.querySelector(`.detail[data-index="${index}"]`);
 
@@ -125,12 +128,12 @@ const allFonts = await getCollection("fonts");
   }
 
   function onDetailNextClick(e) {
-    let idx = parseInt(e.target.dataset.index) + 1;
+    let idx = +e.target.dataset.index + 1;
     processImage(idx)
   }
 
   function onDetailPreviousClick(e) {
-    let idx = parseInt(e.target.dataset.index) - 1;
+    let idx = +e.target.dataset.index - 1;
     processImage(idx)
   }
 
@@ -286,30 +289,30 @@ const allFonts = await getCollection("fonts");
 
   .items-grid {
     display: grid;
-    grid-template-columns: repeat(1,1fr);
+    grid-template-columns: repeat(1, 1fr);
     padding: 1em;
     width: 100vw;
   }
 
   @media (min-width: 360px) {
 	.items-grid {
-		grid-template-columns: repeat(2,1fr);
+		grid-template-columns: repeat(2, 1fr);
 	}
 
   @media (min-width: 768px) {
 	.items-grid {
-		grid-template-columns: repeat(3,1fr);
+		grid-template-columns: repeat(3, 1fr);
 	}
 
   @media (min-width: 1024px) {
     .items-grid {
-      grid-template-columns: repeat(4,1fr);
+      grid-template-columns: repeat(4, 1fr);
     }
   }
 
   @media (min-width: 1280px) {
     .items-grid {
-      grid-template-columns: repeat(5,1fr);
+      grid-template-columns: repeat(5, 1fr);
     }
   }
 

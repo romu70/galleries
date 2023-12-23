@@ -8,8 +8,7 @@ const { font, index } = Astro.props;
 
 <div class="detail" data-index={index}>
   <div class="detail-left">
-    DETAIL VIEW LEFT
-    <!-- <img id="detail-img" src="{image}" alt="{alt}" data-index="{index}" /> -->
+    <!-- <Image src={font.data.image.file} alt={font.data.image.alt} data-index={index} /> -->
   </div>
   <div class="detail-right">
     DETAIL VIEW RIGHT
@@ -18,10 +17,10 @@ const { font, index } = Astro.props;
         <use xlink:href="#close" />
       </svg>
     </button>
-    <!-- <div class="info">
-      <span id="detail-title">"{name}"</span>
-      <span id="detail-pub-date">"{name}"</span>
-    </div> -->
+    <div class="info">
+      <span id="detail-title">"{font.data.place}"</span>
+      <span id="detail-pub-date">{font.data.pubDate}</span>
+    </div>
     <div class="buttons">
       <button class="previous-button" type="button" aria-label="Previous" data-index={index} disabled>
         <svg class="arrow-svg" width="20px" height="20px">
@@ -46,14 +45,12 @@ const { font, index } = Astro.props;
     padding: 2rem;
     background-color: var(--active-background-color);
     /* display: none; */
-    position: fixed;
+    /* position: fixed; */
+    position: absolute;
+    left: 0px;
     inset: 0;
     transition: background-color var(--transDur);
     z-index: 1;
-  }
-
-  .detail[data-open="false"] {
-	  display: none;
   }
 
   .detail-left {
@@ -130,7 +127,8 @@ const { font, index } = Astro.props;
       height: 10em;
       margin: 0rem -1rem;
       padding: 1em;
-      position: static;
+      position: absolute;
+      left: 0px;
     }
 
     .detail-left,
@@ -140,7 +138,7 @@ const { font, index } = Astro.props;
     .detail-left {
       flex: 2;
       margin: 0;
-      max-width: 60%;
+      width: 60%;
     }
 
     .detail-right {
@@ -148,8 +146,7 @@ const { font, index } = Astro.props;
       padding: 0 0 0 1em;
     }
 
-    .detail-left,
-    .detail-img {
+    .detail-left {
       height: 100%;
       width: auto;
     }
