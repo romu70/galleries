@@ -68,16 +68,36 @@ const allFonts = await getCollection("fonts");
 
   function showDetail(detail: Div) {
     if(detail != null) {
+      // Place the detail pane just below the thumbnail's line
       let thumbnail: Div = grid?.querySelector(`.thumbnail[data-index="${detail.dataset.index}"]`);
       markThumbnailActive(thumbnail);
       let top = thumbnail ? thumbnail.getBoundingClientRect()["bottom"] : 0;
 
       // Respect the media query. If width < 768, the detail is full screen,
       // if not, it's below the thumbnail
-      window.innerWidth < 768 ? detail.style.top = "0" : detail.style.top = top.toString() + "px";
-      console.log(window.innerWidth);
+      let breakpoint =  getComputedStyle(document.documentElement).getPropertyValue('--mobile-view-breakpoint');
+      window.innerWidth < Number(breakpoint) ? detail.style.top = "0" : detail.style.top = top.toString() + "px";
       detail.style.visibility = "visible";
       currentShownDetail = detail;
+
+      // If the image placeholder ratio is > image ratio, so it's width first,
+      // else it's height first
+      let placeholder: Div = detail.firstElementChild;
+      let divRatio: number = Number(placeholder?.offsetWidth) / Number(placeholder?.offsetHeight);
+      let detailImg: Div = grid?.querySelector(`.detail-left img[data-index="${detail.dataset.index}"]`);
+      let imgRatio: number = Number(detailImg?.getAttribute("width")) / Number(detailImg?.getAttribute("height"));
+      // console.log("divRatio: " + divRatio);
+      // console.log("imgRatio: " + imgRatio);
+
+      if(detailImg) {
+        if (divRatio < imgRatio) {
+          detailImg.style.width = "100%";
+          detailImg.style.height = "auto";
+        } else {
+          detailImg.style.width = "auto";
+          detailImg.style.height = "100%";
+        }
+      }
     }
   }
 
