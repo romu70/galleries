@@ -9,7 +9,8 @@
   --main-color: rgb(245, 222, 179);
   --aspect-ratio: 1.618; /* golden ratio */
   --active-background-color: #303030;
-
+  --mobile-view-breakpoint: 768;
+  --detail-pane-height: 20rem;
 }
 
 @supports (font-variation-settings: normal) {
@@ -30,10 +31,17 @@ body {
 }
 
 h1 {
-  margin-bottom: 2rem;
-  font-size: 4rem;
+  margin-bottom: 1rem;
+  font-size: 3rem;
   line-height: normal;
   text-align: center;
+  color:var(--main-color)
+}
+
+h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  line-height: normal;
   color:var(--main-color)
 }
 
