@@ -19,12 +19,17 @@ const allFonts = await getCollection("fonts");
 </div>
 
 <script>
-  let grid: Element | null = null;
   type Divs = NodeListOf<HTMLElement> | null | undefined;
   type Div = HTMLElement | null | undefined;
+  let grid: Element | null = null;
   let thumbnails: Divs = null;
   let details: Divs = null;
   let currentShownDetail: Div = null;
+  let detailPaneHeight: number = 0;
+  let currentThumbnailHeight: number = 0;
+  let rem: number = 0;
+  let mobileViewBreakpoint: number =  0;
+
 
   // Init
   document.addEventListener('DOMContentLoaded', function () {
@@ -33,14 +38,58 @@ const allFonts = await getCollection("fonts");
     details = grid?.querySelectorAll('.detail');
     hideAllDetails();
     addThumbnailImageClick();
+    addKeyboardManagement();
     addDetailClick('.close-button', onDetailCloseClick);
     addDetailClick('.next-button', onDetailNextClick);
     addDetailClick('.previous-button', onDetailPreviousClick);
+    detailPaneHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--detail-pane-height'));
+    rem = parseInt(getComputedStyle(document.documentElement).fontSize);
+    mobileViewBreakpoint =  parseInt(getComputedStyle(document.documentElement).getPropertyValue('--mobile-view-breakpoint'));
   });
 
   function addThumbnailImageClick() {
     thumbnails?.forEach(thumbnail => {
       thumbnail.children[0].addEventListener('click', onThumbnailImageClick);
+    });
+  }
+
+  function addKeyboardManagement() {  
+    document.addEventListener("keyup", (event) => {
+      console.log(`Key "${event.key}" released [event: keyup]`);
+      console.log(event);
+      console.log("current index: " + currentShownDetail);
+      if (event.defaultPrevented) {
+        return; // Do nothing if the event was already processed
+      };
+
+      switch (event.key) {
+        case "ArrowDown":
+          // Do something for "down arrow" key press.
+          break;
+        case "ArrowUp":
+          // Do something for "up arrow" key press.
+          break;
+        case "ArrowLeft":
+          // Do something for "left arrow" key press.
+          break;
+        case "ArrowRight":
+          // Do something for "right arrow" key press.
+          break;
+        case "Enter":
+          // Do something for "enter" or "return" key press.
+          break;
+        case " ":
+          // Do something for "space" key press.
+          break;
+        case "Escape":
+          // Do something for "esc" key press.
+          break;
+        default:
+          return; // Quit when this doesn't handle the key event.
+      };
+
+      // Cancel the default action to avoid it being handled twice
+      event.preventDefault();
     });
   }
 
@@ -68,15 +117,29 @@ const allFonts = await getCollection("fonts");
 
   function showDetail(detail: Div) {
     if(detail != null) {
-      // Place the detail pane just below the thumbnail's line
-      let thumbnail: Div = grid?.querySelector(`.thumbnail[data-index="${detail.dataset.index}"]`);
-      markThumbnailActive(thumbnail);
-      let top = thumbnail ? thumbnail.getBoundingClientRect()["bottom"] : 0;
 
       // Respect the media query. If width < 768, the detail is full screen,
       // if not, it's below the thumbnail
-      let breakpoint =  getComputedStyle(document.documentElement).getPropertyValue('--mobile-view-breakpoint');
-      window.innerWidth < Number(breakpoint) ? detail.style.top = "0" : detail.style.top = top.toString() + "px";
+      if(window.innerWidth < mobileViewBreakpoint) {
+        // Mobile view
+        detail.style.top = "0";
+      } else {
+        // Wide view
+        
+        // Place the detail pane just below the thumbnail's line
+        let thumbnail: Div = grid?.querySelector(`.thumbnail[data-index="${detail.dataset.index}"]`);
+        markThumbnailActive(thumbnail);
+        let top = thumbnail?.getBoundingClientRect()["bottom"] + window.scrollY;
+
+        detail.style.top = top?.toString() + "px"
+        // Set the selected item height to "insert" the detail pane into the grid layout
+        let height = thumbnail?.offsetHeight / rem + detailPaneHeight;
+        console.log("new thumb height" + thumbnail?.offsetHeight);
+        if(thumbnail && thumbnail.parentElement) {
+          thumbnail.parentElement.style.height = height + "rem";
+        }
+      }
+
       detail.style.visibility = "visible";
       currentShownDetail = detail;
 
@@ -86,8 +149,6 @@ const allFonts = await getCollection("fonts");
       let divRatio: number = Number(placeholder?.offsetWidth) / Number(placeholder?.offsetHeight);
       let detailImg: Div = grid?.querySelector(`.detail-left img[data-index="${detail.dataset.index}"]`);
       let imgRatio: number = Number(detailImg?.getAttribute("width")) / Number(detailImg?.getAttribute("height"));
-      // console.log("divRatio: " + divRatio);
-      // console.log("imgRatio: " + imgRatio);
 
       if(detailImg) {
         if (divRatio < imgRatio) {
@@ -137,10 +198,23 @@ const allFonts = await getCollection("fonts");
 
   function markThumbnailActive(thumbnail: Div) {
     thumbnail?.classList.add("active");
+    // Save the thumbnail height
+    if(thumbnail) {
+      currentThumbnailHeight = thumbnail.offsetHeight;
+      console.log("save thumb height: " + currentThumbnailHeight);
+    }
   }
 
   function markThumbnailInactive(thumbnail: Div) {
     thumbnail?.classList.remove("active");
+    // Restore the thumbnail height
+    if(thumbnail) {
+      console.log("restore thumb height: " + currentThumbnailHeight);
+      thumbnail.style.height = currentThumbnailHeight.toString() + "px";
+      if(thumbnail.parentElement) {
+        thumbnail.parentElement.style.height = currentThumbnailHeight.toString() + "px";
+      }
+    }
   }
 
   function onDetailCloseClick(e) {
@@ -157,105 +231,9 @@ const allFonts = await getCollection("fonts");
     processImage(idx)
   }
 
-  // let detailPane = null;
-  // let detailPaneOpen = true;
-  // let currentImage = 0;
-  // let images = 5;
-
-  // window.addEventListener("DOMContentLoaded",() => {
-  //   grid = document.querySelector("#items-grid");
-  //   detailPane = grid?.firstElementChild;
-  //   updateView();
-
-  //   grid?.addEventListener("click", callback);
-  //   grid?.addEventListener("keydown", callback);
-  // });
-
-  // function updateView() {
-  //   const index = currentImage;
-  //   detailPane?.setAttribute("data-open", detailPaneOpen.toString());
-
-  //   // change its DOM location
-  //   const minWidths = [360, 768, 1024, 1280];
-  //   const matchedWidths = minWidths.filter(width => {
-  //     const mediaQuery = window.matchMedia(`(min-width: ${width}px)`);
-  //     return mediaQuery.matches;
-  //   });
-
-// TODO : to be reworked by getting directly the item index in the content collection
-    // const imagesPerRow = 1 + matchedWidths.length;
-    // const moveToRow = 1 + Math.ceil((index + 1) / imagesPerRow);
-    // detailPane.style.gridRow = moveToRow;
-
-    // // All thumbs
-    // const paneThumbBtns = grid.querySelectorAll(`.thumbnail`);
-    // // Add the active class on the currently open thumb,
-    // // and remove it from the oother thumbs.
-    // Array.from(paneThumbBtns).forEach((btn, i) => {
-    //   const activeClass = "active";
-
-    //   if (i === index && detailPaneOpen)
-    //     btn.classList.add(activeClass);
-    //   else
-    //     btn.classList.remove(activeClass);
-    // });
-
-    // const detailImage = document.getElementById(`detail-img`);
-    // const currentThumb = grid.querySelector(`[data-index="${index}"]`);
-    // // Get current thumb image
-    // const currentThumbImage = currentThumb.children[0].children[0];
-
-    // update the src of the detail pane image object
-    // if (detailImage && currentThumbImage) {
-    //   detailImage.src = currentThumbImage.src;
-    // }
-
-    // const detailTitle = document.getElementById(`detail-title`);
-    // if (detailTitle) {
-    //   detailTitle.textContent = currentThumb.children[1].children[1].children[0].textContent;
-    // }
-
-    // const detailPubDate = document.getElementById(`detail-pub-date`);
-    // if (detailPubDate) {
-    //   detailPubDate.textContent = currentThumb.children[1].children[0].children[1].textContent;
-    // }
-
-    // const prevButton = document.getElementById(`prev-btn`);
-    // if (prevButton)
-    //   prevButton.disabled = index === 0;
-
-    // disable the right arrow if on the last image
-  //   const nextButton = document.getElementById(`next-btn`);
-  //   if (nextButton)
-  //     nextButton.disabled = images < 2 || index === images - 1;
-  // }
-
-  // function closeDetailPane() {
-  //   detailPaneOpen = false;
-  // }
-
-  // function openDetailPane(imageID) {
-  //   detailPaneOpen = true;
-  //   currentImage = imageID;
-  //   if(detailPane !== null)
-  //       detailPane.style.display = 'flex';
-  // }
-
-  // function prev() {
-  //   --currentImage;
-
-  //   if (currentImage < 0)
-  //     currentImage = 0;
-  // }
-
-  // function next() {
-  //   ++currentImage;
-
-  //   if (images < 2)
-  //     currentImage = 0;
-  //   else if (currentImage === images)
-  //     currentImage = images - 1;
-  // }
+  function onKeyUp(e) {
+    console.log(e);
+  }
 
   // function callback(e) {
 
@@ -312,6 +290,7 @@ const allFonts = await getCollection("fonts");
     grid-template-columns: repeat(1, 1fr);
     padding: 1em;
     width: 100vw;
+    row-gap: 1rem;
   }
 
   @media (min-width: 360px) {
