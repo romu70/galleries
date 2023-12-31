@@ -55,8 +55,8 @@ const allFonts = await getCollection("fonts");
 
   function addKeyboardManagement() {  
     document.addEventListener("keyup", (event) => {
-      console.log(`Key "${event.key}" released [event: keyup]`);
-      console.log(event);
+      // console.log(`Key "${event.key}" released [event: keyup]`);
+      // console.log(event);
       console.log("current index: " + currentShownDetail);
       if (event.defaultPrevented) {
         return; // Do nothing if the event was already processed
@@ -64,25 +64,25 @@ const allFonts = await getCollection("fonts");
 
       switch (event.key) {
         case "ArrowDown":
-          // Do something for "down arrow" key press.
+          // Open the currectly selected thumbnail if any
           break;
         case "ArrowUp":
-          // Do something for "up arrow" key press.
+          // Close the currectly selected thumbnail if any
           break;
         case "ArrowLeft":
-          // Do something for "left arrow" key press.
+          // Previous thumbnail
           break;
         case "ArrowRight":
-          // Do something for "right arrow" key press.
+          // Next thumbnail
           break;
         case "Enter":
-          // Do something for "enter" or "return" key press.
+          // Open the currectly selected thumbnail if any
           break;
         case " ":
-          // Do something for "space" key press.
+          // Open or close the currectly selected thumbnail if any
           break;
         case "Escape":
-          // Do something for "esc" key press.
+          // Close the currectly selected thumbnail if any
           break;
         default:
           return; // Quit when this doesn't handle the key event.
@@ -123,6 +123,7 @@ const allFonts = await getCollection("fonts");
       if(window.innerWidth < mobileViewBreakpoint) {
         // Mobile view
         detail.style.top = "0";
+        detail.style.height = "100vh";
       } else {
         // Wide view
         
@@ -134,7 +135,6 @@ const allFonts = await getCollection("fonts");
         detail.style.top = top?.toString() + "px"
         // Set the selected item height to "insert" the detail pane into the grid layout
         let height = thumbnail?.offsetHeight / rem + detailPaneHeight;
-        console.log("new thumb height" + thumbnail?.offsetHeight);
         if(thumbnail && thumbnail.parentElement) {
           thumbnail.parentElement.style.height = height + "rem";
         }
@@ -201,7 +201,6 @@ const allFonts = await getCollection("fonts");
     // Save the thumbnail height
     if(thumbnail) {
       currentThumbnailHeight = thumbnail.offsetHeight;
-      console.log("save thumb height: " + currentThumbnailHeight);
     }
   }
 
@@ -209,8 +208,8 @@ const allFonts = await getCollection("fonts");
     thumbnail?.classList.remove("active");
     // Restore the thumbnail height
     if(thumbnail) {
-      console.log("restore thumb height: " + currentThumbnailHeight);
       thumbnail.style.height = currentThumbnailHeight.toString() + "px";
+      // Also restore the height of the Item div to remove empty space
       if(thumbnail.parentElement) {
         thumbnail.parentElement.style.height = currentThumbnailHeight.toString() + "px";
       }
@@ -230,57 +229,6 @@ const allFonts = await getCollection("fonts");
     let idx = +e.target.dataset.index - 1;
     processImage(idx)
   }
-
-  function onKeyUp(e) {
-    console.log(e);
-  }
-
-  // function callback(e) {
-
-  //   const { key, shiftKey, target } = e;
-  //   const action = target.getAttribute("data-action");
-  //   const index = +target.parentNode.getAttribute("data-index");
-  //   // console.log(target);
-  //   // console.log(action);
-
-  //   ////// Keyboard management ///////
-  //   if (key !== "Tab" && !shiftKey) {
-  //     // open the pane (or close if clicking the thumb)
-  //     if (!key && action === "open") {
-  //       if (index === currentImage && detailPaneOpen)
-  //         closeDetailPane();
-  //       else
-  //         openDetailPane(index);
-
-  //     // close the pane
-  //     } else if (key === "Escape" || action === "close") {
-  //       closeDetailPane();
-
-  //     // previous image
-  //     } else if (key === "ArrowLeft" || (!key && action === "prev")) {
-  //       prev();
-
-  //     // next image
-  //     } else if (key === "ArrowRight" || (!key && action === "next")) {
-  //       next();
-  //     }
-
-  //     updateView();
-  //     moveFocus(target, action);
-  //   }
-  // }
-
-  // function moveFocus(target, action) {
-  //   if(action === "prev" || action === "next") {
-  //     if (target.disabled) {
-  //       const btn = action + "-btn";
-  //       document.getElementById(btn)?.focus();
-  //     } else {
-  //       target.focus();
-  //     }
-  //   }
-  // }
-
 </script>
 
 <style>
