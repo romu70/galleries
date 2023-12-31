@@ -5,6 +5,10 @@ import Location from '../components/Location.astro';
 import { Debug } from 'astro:components';
 
 const { font, index } = Astro.props;
+
+const locationRoot = "https://www.openstreetmap.org/node/";
+let url = locationRoot + font.data.node;
+
 ---
 
 <div class="detail" data-index={index}>
@@ -21,6 +25,7 @@ const { font, index } = Astro.props;
         <h2><Location node={font.data.node} place={font.data.image.alt + ", " + font.data.place} /></h2>
         <Date date={font.data.pubDate} />
       </div>
+      <button class="location-button"><a href={url} target="_blank">See location</a></button>
       <div class="buttons">
         <button class="previous-button" type="button" aria-label="Previous" data-index={index} disabled>
           <svg class="arrow-svg" width="24px" height="24px">
@@ -65,7 +70,6 @@ const { font, index } = Astro.props;
     display: flex;
     flex-direction: column;
     flex: 1 1 30%;
-    justify-content: flex-end;
     gap: 2rem;
     height: 100;
   }
@@ -92,7 +96,27 @@ const { font, index } = Astro.props;
     border-radius: 100%;
   }
 
-  button:disabled {
+  .location-button,
+  .location-button a {
+    align-self: flex-start;
+    width: auto;
+    padding: 0 1rem;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--main-color);
+    text-decoration: none;
+  }
+
+  .location-button:hover,
+  .location-button:hover a,
+  .location-button a:hover {
+    color: var(--active-background-color);
+    outline: transparent;
+    background-color: var(--main-color);
+  }
+
+    button:disabled {
     opacity: 0.5;
   }
 
