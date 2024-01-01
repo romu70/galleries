@@ -138,6 +138,15 @@ const allFonts = await getCollection("fonts");
         if(thumbnail && thumbnail.parentElement) {
           thumbnail.parentElement.style.height = height + "rem";
         }
+
+        // The idea of the timeout is taken from this:
+        // https://stackoverflow.com/questions/71181018/scrollintoview-doesnt-scroll-anywhere
+        setTimeout(function () {
+          thumbnail?.scrollIntoView({
+               behavior: "smooth",
+               block: "center",
+           });
+      }, 100);
       }
 
       detail.style.visibility = "visible";
@@ -149,12 +158,16 @@ const allFonts = await getCollection("fonts");
       let divRatio: number = Number(placeholder?.offsetWidth) / Number(placeholder?.offsetHeight);
       let detailImg: Div = grid?.querySelector(`.detail-left img[data-index="${detail.dataset.index}"]`);
       let imgRatio: number = Number(detailImg?.getAttribute("width")) / Number(detailImg?.getAttribute("height"));
+      console.log("divRatio: " + divRatio);
+      console.log("imgRatio: " + imgRatio);
 
       if(detailImg) {
         if (divRatio < imgRatio) {
+          console.log("less");
           detailImg.style.width = "100%";
           detailImg.style.height = "auto";
         } else {
+          console.log("more");
           detailImg.style.width = "auto";
           detailImg.style.height = "100%";
         }
@@ -249,6 +262,7 @@ const allFonts = await getCollection("fonts");
   @media (min-width: 768px) {
 	.items-grid {
 		grid-template-columns: repeat(3, 1fr);
+    margin-bottom: 8rem;
 	}
 
   @media (min-width: 1024px) {
