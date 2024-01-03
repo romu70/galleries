@@ -71,6 +71,7 @@ let url = locationRoot + font.data.node;
     flex-direction: column;
     flex: 1 1 30%;
     height: 100%;
+    justify-content: space-between;
   }
 
   .info {
@@ -93,21 +94,22 @@ let url = locationRoot + font.data.node;
     height: 2.5rem;
     border: 1px solid var(--main-color);
     border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
-  /* Center the svg on buttons */
-  button svg {
-    margin-top: 3px;
-  }
-
-  .location-button,
-  .location-button a {
+  .location-button {
     align-self: flex-start;
     width: auto;
     padding: 0 1rem;
     border-radius: 0.5rem;
     font-size: 1rem;
     font-weight: 600;
+  }
+
+  .location-button a {
+    align-self: center;
     color: var(--main-color);
     text-decoration: none;
   }
@@ -155,7 +157,6 @@ let url = locationRoot + font.data.node;
     }
 
     .detail-right {
-      justify-content: space-between;
       gap: 1rem;
     }
 
@@ -171,11 +172,5 @@ let url = locationRoot + font.data.node;
     .detail-left {
       flex-basis: 65%; 
     }
-
-    .detail-right {
-      gap: 2rem;
-    }
   }
-
-
 </style>
