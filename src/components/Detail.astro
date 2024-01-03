@@ -70,8 +70,7 @@ let url = locationRoot + font.data.node;
     display: flex;
     flex-direction: column;
     flex: 1 1 30%;
-    gap: 2rem;
-    height: 100;
+    height: 100%;
   }
 
   .info {
@@ -94,6 +93,11 @@ let url = locationRoot + font.data.node;
     height: 2.5rem;
     border: 1px solid var(--main-color);
     border-radius: 100%;
+  }
+
+  /* Center the svg on buttons */
+  button svg {
+    margin-top: 3px;
   }
 
   .location-button,
@@ -139,7 +143,7 @@ let url = locationRoot + font.data.node;
     }
 
     .detail-left {
-      flex-basis: 65%;
+      flex-basis: 60%;
       max-width: 76%;
       height: 100%;
       display: flex;
@@ -152,6 +156,7 @@ let url = locationRoot + font.data.node;
 
     .detail-right {
       justify-content: space-between;
+      gap: 1rem;
     }
 
     .buttons {
@@ -161,5 +166,16 @@ let url = locationRoot + font.data.node;
       gap: 1rem;
     }
   }
+
+  @media (min-width: 1024px) {
+    .detail-left {
+      flex-basis: 65%; 
+    }
+
+    .detail-right {
+      gap: 2rem;
+    }
+  }
+
 
 </style>
