@@ -6,12 +6,25 @@ import Item from '../components/Item.astro';
 import { Debug } from 'astro:components';
 
 const allFonts = await getCollection("fonts");
+
+// Most recent font first
+function compare(a, b) {
+  if(a["slug"] > b["slug"]) {
+    return -1;
+  }
+  if(a["slug"] < b["slug"]) {
+    return 1;
+  }
+  if(a["slug"] == b["slug"]) {
+    return 0;
+  }
+}
 ---
 
 <div class="items-grid" id="items-grid">
   <!-- <Detail /> -->
   {
-    allFonts.map((font, index) => (
+    allFonts.sort(compare).map((font, index) => (
       // <Debug {font} />
       <Item font={font} index={index}/>
     ))
