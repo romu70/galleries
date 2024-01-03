@@ -1,4 +1,7 @@
-import { defineConfig } from 'astro/config';
+import { defineConfig } from 'astro/config'
 
-// https://astro.build/config
-export default defineConfig({});
+export default defineConfig({
+  site: 'https://romu70.github.io',
+  // base: '/galleries',
+  base: '/galleries',
+})
