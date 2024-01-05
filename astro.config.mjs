@@ -1,7 +1,6 @@
 import { defineConfig } from 'astro/config'
 
 export default defineConfig({
-  site: 'https://romu70.github.io',
+  site: 'https://galleries.tisserand.eu',
   // base: '/galleries',
-  base: '/galleries',
 })
