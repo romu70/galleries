@@ -1,8 +1,9 @@
 ---
 import "../styles/gallery.css";
-import Symbols from "../components/Symbols.astro";
+// import Symbols from "../components/Symbols.astro";
 
-const title = "Galleries";
+const { title } = Astro.props;
+
 ---
 
 <html lang="en">
@@ -16,7 +17,7 @@ const title = "Galleries";
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
   </head>
   <body>
-    <Symbols />
+    <!-- <Symbols /> -->
     <h1>{title}</h1>
       <slot />
   </body>
