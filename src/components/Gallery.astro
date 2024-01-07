@@ -1,11 +1,11 @@
 ---
 import { getCollection } from "astro:content";
 import Item from '../components/Item.astro';
-// import Thumbnail from '../components/Thumbnail.astro';
-// import Detail from '../components/Detail.astro';
 import { Debug } from 'astro:components';
+import Symbols from "../components/Symbols.astro";
 
-const allFonts = await getCollection("fonts");
+
+const allFonts = await getCollection('fonts');
 
 // Most recent font first
 function compare(a, b) {
@@ -21,11 +21,10 @@ function compare(a, b) {
 }
 ---
 
+<Symbols />
 <div class="items-grid" id="items-grid">
-  <!-- <Detail /> -->
   {
-    allFonts.sort(compare).map((font, index) => (
-      // <Debug {font} />
+    allFonts.sort(compare).map((font, index: number) => (
       <Item font={font} index={index}/>
     ))
   }
@@ -106,7 +105,7 @@ function compare(a, b) {
     });
   }
 
-  function addDetailClick(clazz, callback) {
+  function addDetailClick(clazz: string, callback: EventListenerOrEventListenerObject) {
     let buttons = grid?.querySelectorAll(clazz);
     buttons?.forEach(button => {
       button.addEventListener('click', callback);
@@ -142,24 +141,26 @@ function compare(a, b) {
         
         // Place the detail pane just below the thumbnail's line
         let thumbnail: Div = grid?.querySelector(`.thumbnail[data-index="${detail.dataset.index}"]`);
-        markThumbnailActive(thumbnail);
-        let top = thumbnail?.getBoundingClientRect()["bottom"] + window.scrollY;
+        if(thumbnail) {
+          markThumbnailActive(thumbnail);
+          let top = thumbnail.getBoundingClientRect()["bottom"] + window.scrollY;
 
-        detail.style.top = top?.toString() + "px"
-        // Set the selected item height to "insert" the detail pane into the grid layout
-        let height = thumbnail?.offsetHeight / rem + detailPaneHeight;
-        if(thumbnail && thumbnail.parentElement) {
-          thumbnail.parentElement.style.height = height + "rem";
+          detail.style.top = top?.toString() + "px"
+          // Set the selected item height to "insert" the detail pane into the grid layout
+          let height = thumbnail?.offsetHeight / rem + detailPaneHeight;
+          if(thumbnail && thumbnail.parentElement) {
+            thumbnail.parentElement.style.height = height + "rem";
+          }
+
+          // The idea of the timeout is taken from this:
+          // https://stackoverflow.com/questions/71181018/scrollintoview-doesnt-scroll-anywhere
+          setTimeout(function () {
+            thumbnail?.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+            });
+          }, 100);
         }
-
-        // The idea of the timeout is taken from this:
-        // https://stackoverflow.com/questions/71181018/scrollintoview-doesnt-scroll-anywhere
-        setTimeout(function () {
-          thumbnail?.scrollIntoView({
-               behavior: "smooth",
-               block: "center",
-           });
-      }, 100);
       }
 
       detail.style.visibility = "visible";
@@ -167,20 +168,20 @@ function compare(a, b) {
 
       // If the image placeholder ratio is > image ratio, so it's width first,
       // else it's height first
-      let placeholder: Div = detail.firstElementChild;
+      let placeholder: Div = detail.firstElementChild as HTMLElement;
       let divRatio: number = Number(placeholder?.offsetWidth) / Number(placeholder?.offsetHeight);
       let detailImg: Div = grid?.querySelector(`.detail-left img[data-index="${detail.dataset.index}"]`);
       let imgRatio: number = Number(detailImg?.getAttribute("width")) / Number(detailImg?.getAttribute("height"));
-      console.log("divRatio: " + divRatio);
-      console.log("imgRatio: " + imgRatio);
+      // console.log("divRatio: " + divRatio);
+      // console.log("imgRatio: " + imgRatio);
 
       if(detailImg) {
         if (divRatio < imgRatio) {
-          console.log("less");
+          // console.log("less");
           detailImg.style.width = "100%";
           detailImg.style.height = "auto";
         } else {
-          console.log("more");
+          // console.log("more");
           detailImg.style.width = "auto";
           detailImg.style.height = "100%";
         }
@@ -188,8 +189,10 @@ function compare(a, b) {
     }
   }
 
-  function onThumbnailImageClick(e) {
-    processImage(e.target.parentNode.dataset.index);
+  function onThumbnailImageClick(this: HTMLElement, e: Event) {
+    let parent: Div = this.parentNode as Div;
+    let idx: number = Number(parent?.dataset.index);
+    processImage(idx);
   }
 
   function processImage(index: number) {
@@ -242,18 +245,18 @@ function compare(a, b) {
     }
   }
 
-  function onDetailCloseClick(e) {
-    hideDetail(e.target.parentNode.parentNode);
+  function onDetailCloseClick(this: HTMLElement, e: Event) {
+    hideDetail(this.parentNode?.parentNode as Div);
   }
 
-  function onDetailNextClick(e) {
-    let idx = +e.target.dataset.index + 1;
-    processImage(idx)
+  function onDetailNextClick(this: HTMLElement, e: Event) {
+    let idx: number = Number(this.dataset.index);
+    processImage(idx + 1)
   }
 
-  function onDetailPreviousClick(e) {
-    let idx = +e.target.dataset.index - 1;
-    processImage(idx)
+  function onDetailPreviousClick(this: HTMLElement, e: Event) {
+    let idx: number = Number(this.dataset.index);
+    processImage(idx - 1)
   }
 </script>
 
