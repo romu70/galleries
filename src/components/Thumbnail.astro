@@ -2,7 +2,7 @@
 import { Image } from 'astro:assets';
 import Date from '../components/Date.astro';
 import Location from '../components/Location.astro';
-import { Debug } from 'astro:components';
+// import { Debug } from 'astro:components';
 
 const { font, index } = Astro.props;
 ---
@@ -17,10 +17,12 @@ const { font, index } = Astro.props;
 </div>
 
 <script>
+  type ImageList = NodeListOf<HTMLImageElement> | null | undefined;
+
   // All the process and calculations needed to generate thumbnail which
   // take into account the widht/height ratio of images.
   document.addEventListener('DOMContentLoaded', function () {
-    const images = document.querySelectorAll('.thumbnail-image img');
+    const images: ImageList = document.querySelectorAll('.thumbnail-image img');
     images.forEach(image => {
 
       if (image.complete) {
@@ -33,7 +35,7 @@ const { font, index } = Astro.props;
     });
   });
 
-  function cropAndPositionImage(img) {
+  function cropAndPositionImage(img: HTMLImageElement) {
     const imgRatio = img.width / img.height;
 
     // Get the ratio value declared in the :root CSS section 
