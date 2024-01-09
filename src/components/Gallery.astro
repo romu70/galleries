@@ -4,20 +4,20 @@ import Item from '../components/Item.astro';
 import { Debug } from 'astro:components';
 import Symbols from "../components/Symbols.astro";
 
-
 const allFonts = await getCollection('fonts');
 
+// fake type to build
+type zobj = { slug: string };
 // Most recent font first
-function compare(a, b) {
+function compare(a: zobj, b: zobj) {
   if(a["slug"] > b["slug"]) {
     return -1;
   }
   if(a["slug"] < b["slug"]) {
     return 1;
   }
-  if(a["slug"] == b["slug"]) {
-    return 0;
-  }
+
+  return 0;
 }
 ---
 
@@ -25,6 +25,7 @@ function compare(a, b) {
 <div class="items-grid" id="items-grid">
   {
     allFonts.sort(compare).map((font, index: number) => (
+      // <Debug {font}/>
       <Item font={font} index={index}/>
     ))
   }
@@ -261,7 +262,6 @@ function compare(a, b) {
 </script>
 
 <style>
-
   .items-grid {
     display: grid;
     grid-template-columns: repeat(1, 1fr);
@@ -284,7 +284,8 @@ function compare(a, b) {
 	.items-grid {
 		grid-template-columns: repeat(3, 1fr);
     margin-bottom: 8rem;
-	}
+	  }
+  }
 
   @media (min-width: 1024px) {
     .items-grid {
