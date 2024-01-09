@@ -1,7 +1,6 @@
 ---
+import Header from '../components/Header.astro';
 import "../styles/gallery.css";
-// import Symbols from "../components/Symbols.astro";
-
 const { title } = Astro.props;
 
 ---
@@ -17,8 +16,16 @@ const { title } = Astro.props;
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
   </head>
   <body>
-    <!-- <Symbols /> -->
-    <h1>{title}</h1>
+    <!-- <Header/> -->
+    <div id="content">
+      <h1>{title}</h1>
       <slot />
+    </div>
   </body>
 </html>
+
+<style>
+  #content {
+    margin-top: 2rem;
+  }
+</style>

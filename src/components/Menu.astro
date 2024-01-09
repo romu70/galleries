@@ -1,0 +1,76 @@
+---
+---
+
+<div id="menu">
+  <a href="/">Fonts Gallery</a>
+  <a href="/about/">About</a>
+</div>
+
+<style>
+  #menu {
+    display: none;
+    flex-direction: row;
+    align-items: flex-end;
+    align-content: end;
+    background-color: #ff9776;
+    /* visibility: hidden; */
+  }
+  
+  #menu a {
+    color:var(--main-color);
+    text-align: center;
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: 500;
+  }
+  
+  #menu a:hover,
+  #menu a:focus {
+    background-color: #ff9776;
+  }
+
+  @media screen and (min-width: 636px) {
+    #menu {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-end;
+      align-content: end;
+    }
+    #menu a {
+      /* display: inline-block; */
+      padding: 15px 20px;
+    }
+  }
+
+  #menu {
+    margin: auto;
+    width: 90%;
+  }
+
+  @media (min-width: 360px) {
+	#menu {
+	}
+
+  @media (min-width: 440px) {
+	#menu {
+    width: 85%;
+	}
+
+  @media (min-width: 768px) {
+    #menu {
+      width: 80%;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    #menu {
+      width: 70%;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    #menu {
+      width: 60%;
+    }
+  }
+</style>

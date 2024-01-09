@@ -1,0 +1,21 @@
+---
+import Navigation from './Menu.astro';
+import Hamburger from '../components/Hamburger.astro';
+---
+
+<header>
+  <Hamburger /> 
+  <Navigation />
+</header>
+
+<style>
+    header {
+      display: flex;
+      flex-direction: row;
+      /* margin-top: 0.5rem; */
+      width:100%;
+      background-color: red;
+      align-content: center;
+      align-items: center;
+    }
+  </style>
