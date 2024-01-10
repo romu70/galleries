@@ -7,9 +7,9 @@ import Symbols from "../components/Symbols.astro";
 const allFonts = await getCollection('fonts');
 
 // fake type to build
-type zobj = { slug: string };
+type Font = typeof allFonts[0];
 // Most recent font first
-function compare(a: zobj, b: zobj) {
+function compare(a: Font, b: Font) {
   if(a["slug"] > b["slug"]) {
     return -1;
   }
