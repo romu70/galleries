@@ -1,28 +1,32 @@
 ---
 ---
 
-<div class="hamburger">
+<div id="hamburger">
   <span class="line"></span>
   <span class="line"></span>
   <span class="line"></span>
 </div>
 
 <style>
-.hamburger {
-  padding-right: 20px;
+#hamburger {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
   cursor: pointer;
 }
 
-.hamburger .line {
+#hamburger .line {
   display: block;
-  width: 40px;
-  height: 5px;
-  margin-bottom: 10px;
+  width: 30px;
+  height: 3px;
   background-color: var(--main-color);
 }
 
-@media screen and (min-width: 636px) {
-  .hamburger {
+@media screen and (min-width: 768px) {
+  #hamburger {
     display: none;
   }
 }

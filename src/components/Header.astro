@@ -3,18 +3,44 @@ import Navigation from './Menu.astro';
 import Hamburger from '../components/Hamburger.astro';
 ---
 
-<header>
+<div id="header">
   <Hamburger /> 
   <Navigation />
-</header>
+</div>
 
 <style>
-    header {
-      display: flex;
-      flex-direction: row;
+  #header {
+    display: flex;
+    flex-direction: column;
+    width:50%;
+    justify-content: flex-start;
+    align-items: flex-start;
+    z-index: 99;
+    position: absolute;
+    top:0;
+  }
+
+  #header.expanded {
+    background-color: var(--active-background-color);
+  }
+
+  @media screen and (min-width: 768px) {
+    #header {
       width:100%;
-      background-color: red;
-      align-content: center;
-      align-items: center;
+      flex-direction: row;
+      position: inherit;
     }
-  </style>
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    let hamburger = document.getElementById('hamburger');
+    hamburger?.addEventListener('click', () => {
+      let element = document.getElementById('menu');
+      element?.classList.toggle('expanded');
+      element = document.getElementById('header');
+      element?.classList.toggle('expanded');
+    });
+  });
+</script>
