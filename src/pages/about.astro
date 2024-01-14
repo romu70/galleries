@@ -1,4 +1,5 @@
 ---
+import type { manifest } from 'astro:ssr-manifest';
 import Page from '../layouts/Page.astro';
 const title = "About me and this project";
 
@@ -7,42 +8,61 @@ const title = "About me and this project";
 
 <Page title={title}>
   <div id="about">
-    <p>bla bla bla</p>
+    <p>Hi,</p>
+    <p>Welcome to my galleries web site.</p>
+    <p>I'm Romuald, I'm French, and for a living I work as a product manager and designer. I can't pretend being a web developper. But here is a small attempt to learn with subjects I like.</p>
+    <br>
+    <p>This web site is a hobby project. It's made with the <a href="https://astro.build" target="blank">Astro</a> framework, some lines of CSS, HTML and vanilla Javascript for the interactivity. I want to thank my colleague <a href="https://www.linkedin.com/in/guillaume-denier/" target="blank">Guillaume Denier</a> who was kind enough to help me.</p>
+    <br>
+    <p>This work is NOT a professional project and NOT my portfolio. While I try to respect the best practises as much as possible, I can't say it's perfect. So if you think some things can be made better, please feel free to contact me on GitHub (link here above).</p>
+    <br>
+    <p>Thanks for reading, happy browing.</p>
   </div>
 </Page>
 
 <style>
   #about {
+    color: var(--main-color);
     margin: auto;
-    display: flex;
+    flex-direction: column;
     align-content: center;
     width: 90%;
-    background-color: greenyellow;
+    line-height: 160%;
+  }
+
+  #about a {
+    color: var(--main-color);
+    font-weight: 600;
   }
 
   @media (min-width: 360px) {
 	#about {
+    margin-top: 1rem;
 	}
 
   @media (min-width: 440px) {
 	#about {
     width: 85%;
+    margin-top: 2rem;
 	}
 
   @media (min-width: 768px) {
     #about {
+      margin-top: 2rem;
       width: 80%;
     }
   }
 
   @media (min-width: 1024px) {
     #about {
+      margin-top: 2rem;
       width: 70%;
     }
   }
 
   @media (min-width: 1280px) {
     #about {
+      margin-top: 2rem;
       width: 60%;
     }
   }
