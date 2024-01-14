@@ -22,6 +22,10 @@ function compare(a: Font, b: Font) {
 ---
 
 <Symbols />
+<div id="about">
+  <p>I like fonts. As soon as I seen a font I like in the real life, I take it in picture. This gallery presents all the fonts I've shot and the ones who people sent me. I hope you like it, and if you want to see your fonts here, feel free to contact me on GitHub. Thanks.</p>
+</div>
+
 <div class="items-grid" id="items-grid">
   {
     allFonts.sort(compare).map((font, index: number) => (
@@ -70,7 +74,7 @@ function compare(a: Font, b: Font) {
     document.addEventListener("keyup", (event) => {
       // console.log(`Key "${event.key}" released [event: keyup]`);
       // console.log(event);
-      console.log("current index: " + currentShownDetail);
+      // console.log("current index: " + currentShownDetail);
       if (event.defaultPrevented) {
         return; // Do nothing if the event was already processed
       };
@@ -270,26 +274,61 @@ function compare(a: Font, b: Font) {
     row-gap: 1rem;
   }
 
+  #about {
+    color: var(--main-color);
+    margin: auto;
+    flex-direction: column;
+    align-content: center;
+    width: 90%;
+    line-height: 160%;
+  }
+
+  #about a {
+    color: var(--main-color);
+    font-weight: 600;
+  }
+
   @media (min-width: 360px) {
-	.items-grid {
-		grid-template-columns: repeat(1, 1fr);
-	}
+    .items-grid {
+      grid-template-columns: repeat(1, 1fr);
+    }
+
+    #about {
+      margin-top: 1rem;
+    }
+  }
 
   @media (min-width: 440px) {
-	.items-grid {
-		grid-template-columns: repeat(2, 1fr);
-	}
+    .items-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    #about {
+      width: 85%;
+      margin-top: 2rem;
+    }
+  }
 
   @media (min-width: 768px) {
 	.items-grid {
 		grid-template-columns: repeat(3, 1fr);
     margin-bottom: 8rem;
 	  }
+
+    #about {
+      margin-top: 2rem;
+      width: 80%;
+    }
   }
 
   @media (min-width: 1024px) {
     .items-grid {
       grid-template-columns: repeat(4, 1fr);
+    }
+
+    #about {
+      margin-top: 2rem;
+      width: 70%;
     }
   }
 
@@ -297,14 +336,12 @@ function compare(a: Font, b: Font) {
     .items-grid {
       grid-template-columns: repeat(5, 1fr);
     }
+
+    #about {
+      margin-top: 2rem;
+      width: 60%;
+    }
   }
 
-  /* Ensure the last line is correctly  aligned
-    by adding an empty element with the same width as other images.
-  */
-  /* .items-grid::after {
-    content: "";
-    flex-grow: 999;
-  } */
-</style>
+  </style>
   
