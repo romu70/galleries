@@ -23,7 +23,7 @@ function compare(a: Font, b: Font) {
 
 <Symbols />
 <div id="about">
-  <p>I like fonts. As soon as I see a font I like in the real life, I take it in picture. This gallery presents all the fonts I've shot and the ones who people sent me. I hope you like it, and if you want to see your fonts here, feel free to contact me on GitHub. Thanks.</p>
+  <p>I like fonts. As soon as I see one I like in the real life, I take it in picture. This gallery presents all the fonts I've shot and the ones who people sent me. I hope you like it, and if you want to see your fonts here, feel free to contact me on GitHub. Thanks.</p>
 </div>
 
 <div class="items-grid" id="items-grid">
@@ -355,6 +355,17 @@ function compare(a: Font, b: Font) {
   @media (min-width: 1282px) {
     .items-grid {
       grid-template-columns: repeat(5, 1fr);
+    }
+
+    #about {
+      margin-top: 2rem;
+      width: 60%;
+    }
+  }
+
+  @media (min-width: 1441px) {
+    .items-grid {
+      grid-template-columns: repeat(6, 1fr);
     }
 
     #about {
