@@ -240,10 +240,8 @@ function compare(a: Font, b: Font) {
   function markThumbnailActive(thumbnail: Div) {
     // Save the thumbnail height
     if(thumbnail) {
-      console.log("thumbnail not null");
       thumbnail.classList.add("active");
       currentThumbnailHeight = thumbnail.offsetHeight;
-      console.log("currentThumbnailHeight: " + currentThumbnailHeight);
     }
   }
 
