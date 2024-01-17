@@ -19,7 +19,7 @@ const base = import.meta.env.BASE_URL;
   rssButton?.addEventListener('click', onRssClick);
 
   function onRssClick(this: HTMLElement, e: Event) {
-    let url: string | undefined = document.location.host + this.dataset.url;
+    let url: string | undefined = "https://" + document.location.host + this.dataset.url;
     if(url) {
       navigator.clipboard.writeText(url);
       alert(`RSS link copied!\n\n${url}`);
