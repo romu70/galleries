@@ -23,7 +23,7 @@ function compare(a: Font, b: Font) {
 
 <Symbols />
 <div id="about">
-  <p>I like fonts. As soon as I seen a font I like in the real life, I take it in picture. This gallery presents all the fonts I've shot and the ones who people sent me. I hope you like it, and if you want to see your fonts here, feel free to contact me on GitHub. Thanks.</p>
+  <p>I like fonts. As soon as I see a font I like in the real life, I take it in picture. This gallery presents all the fonts I've shot and the ones who people sent me. I hope you like it, and if you want to see your fonts here, feel free to contact me on GitHub. Thanks.</p>
 </div>
 
 <div class="items-grid" id="items-grid">
@@ -36,6 +36,11 @@ function compare(a: Font, b: Font) {
 </div>
 
 <script>
+// console.log(document.documentElement.clientWidth);
+// console.log(document.documentElement.clientHeight);
+// console.log(window.innerWidth);
+// console.log(window.innerHeight);
+
   type Divs = NodeListOf<HTMLElement> | null | undefined;
   type Div = HTMLElement | null | undefined;
   let grid: Element | null = null;
@@ -135,6 +140,9 @@ function compare(a: Font, b: Font) {
   function showDetail(detail: Div) {
     if(detail != null) {
 
+      let thumbnail: Div = grid?.querySelector(`.thumbnail[data-index="${detail.dataset.index}"]`);
+      markThumbnailActive(thumbnail);
+
       // Respect the media query. If width < 768, the detail is full screen,
       // if not, it's below the thumbnail
       if(window.innerWidth < mobileViewBreakpoint) {
@@ -145,9 +153,8 @@ function compare(a: Font, b: Font) {
         // Wide view
         
         // Place the detail pane just below the thumbnail's line
-        let thumbnail: Div = grid?.querySelector(`.thumbnail[data-index="${detail.dataset.index}"]`);
+        // let thumbnail: Div = grid?.querySelector(`.thumbnail[data-index="${detail.dataset.index}"]`);
         if(thumbnail) {
-          markThumbnailActive(thumbnail);
           let top = thumbnail.getBoundingClientRect()["bottom"] + window.scrollY;
 
           detail.style.top = top?.toString() + "px"
@@ -160,7 +167,7 @@ function compare(a: Font, b: Font) {
           // The idea of the timeout is taken from this:
           // https://stackoverflow.com/questions/71181018/scrollintoview-doesnt-scroll-anywhere
           setTimeout(function () {
-            thumbnail?.scrollIntoView({
+                detail?.scrollIntoView({
                 behavior: "smooth",
                 block: "center",
             });
@@ -231,17 +238,19 @@ function compare(a: Font, b: Font) {
   }
 
   function markThumbnailActive(thumbnail: Div) {
-    thumbnail?.classList.add("active");
     // Save the thumbnail height
     if(thumbnail) {
+      console.log("thumbnail not null");
+      thumbnail.classList.add("active");
       currentThumbnailHeight = thumbnail.offsetHeight;
+      console.log("currentThumbnailHeight: " + currentThumbnailHeight);
     }
   }
 
   function markThumbnailInactive(thumbnail: Div) {
-    thumbnail?.classList.remove("active");
     // Restore the thumbnail height
     if(thumbnail) {
+      thumbnail.classList.remove("active");
       thumbnail.style.height = currentThumbnailHeight.toString() + "px";
       // Also restore the height of the Item div to remove empty space
       if(thumbnail.parentElement) {
@@ -309,10 +318,12 @@ function compare(a: Font, b: Font) {
     }
   }
 
-  @media (min-width: 768px) {
-	.items-grid {
-		grid-template-columns: repeat(3, 1fr);
-    margin-bottom: 8rem;
+  /* @media (min-width: 768px) { */
+    /* @media only screen and (min-width: 768px) and (orientation:portrait) { */
+  @media only screen and (min-device-width : 768px) and (max-device-width : 1024px) and (orientation : portrait) {
+    .items-grid {
+      grid-template-columns: repeat(3, 1fr);
+      margin-bottom: 8rem;
 	  }
 
     #about {
@@ -332,7 +343,7 @@ function compare(a: Font, b: Font) {
     }
   }
 
-  @media (min-width: 1280px) {
+  @media (min-width: 1282px) {
     .items-grid {
       grid-template-columns: repeat(5, 1fr);
     }
