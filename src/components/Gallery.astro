@@ -316,9 +316,7 @@ function compare(a: Font, b: Font) {
     }
   }
 
-  /* @media (min-width: 768px) { */
-    /* @media only screen and (min-width: 768px) and (orientation:portrait) { */
-  @media only screen and (min-device-width : 768px) and (max-device-width : 1024px) and (orientation : portrait) {
+  @media (min-width: 768px) {
     .items-grid {
       grid-template-columns: repeat(3, 1fr);
       margin-bottom: 8rem;
@@ -330,7 +328,20 @@ function compare(a: Font, b: Font) {
     }
   }
 
-  @media (min-width: 1024px) {
+  /* Trick for portrait iPad */
+  @media only screen and (min-width: 1024px) and (orientation: portrait) { 
+    .items-grid {
+      grid-template-columns: repeat(3, 1fr);
+      margin-bottom: 8rem;
+	  }
+
+    #about {
+      margin-top: 2rem;
+      width: 80%;
+    }
+  }
+
+  @media only screen and (min-width: 1024px) and (orientation: landscape) { 
     .items-grid {
       grid-template-columns: repeat(4, 1fr);
     }
