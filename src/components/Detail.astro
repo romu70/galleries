@@ -6,8 +6,8 @@ import { Debug } from 'astro:components';
 
 const { font, index } = Astro.props;
 
-const locationRoot = "https://www.openstreetmap.org/node/";
-let url = locationRoot + font.data.node;
+const locationRoot = "https://www.openstreetmap.org/?";
+let url = locationRoot + font.data.geo;
 
 ---
 
@@ -22,7 +22,7 @@ let url = locationRoot + font.data.node;
         </svg>
       </button>
       <div class="info">
-        <h2><Location node={font.data.node} place={font.data.image.alt + ", " + font.data.place} /></h2>
+        <h2><Location geo={font.data.geo} place={font.data.image.alt + ", " + font.data.place} /></h2>
         <Date date={font.data.pubDate} />
       </div>
       <button class="location-button"><a href={url} target="_blank">See location</a></button>

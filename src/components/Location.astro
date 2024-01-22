@@ -1,8 +1,8 @@
 ---
-const { node, place } = Astro.props;
-const locationRoot = "https://www.openstreetmap.org/node/";
+const { geo, place } = Astro.props;
+const locationRoot = "https://www.openstreetmap.org/?";
 
-let url = locationRoot + node;
+let url = locationRoot + geo;
 ---
 
 <div class="location">
