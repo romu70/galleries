@@ -1,9 +1,83 @@
 ---
 import Page from '../layouts/Page.astro';
-import Gallery from '../components/Gallery.astro'
+import HomeButton from '../components/HomeButton.astro';
+
+import fontImg from "../images/font.jpg";
+import saImg from "../images/streetart.jpg";
 ---
 
-<Page title="Fonts Gallery">
-  <Gallery />
+<Page title="Galleries">
+  <div id="galleries">
+    <HomeButton label="Fonts Gallery" img={fontImg}/>
+    <HomeButton label="Street Art Gallery" img={saImg} comment="Coming soon..."/>
+  </div>
 </Page>
 
+<style>
+  #galleries {
+    display: flex;
+    color: var(--main-color);
+    margin: auto;
+    flex-direction: row;
+    align-content: center;
+    justify-content: center;
+    width: 90%;
+    line-height: 160%;
+    gap: 2rem;
+  }
+
+  /* #galleries a {
+    color: var(--main-color);
+    font-weight: 600;
+  }
+ */
+
+  .button {
+  }
+
+  @media (min-width: 360px) {
+    #galleries {
+      margin-top: 1rem;
+    }
+  }
+
+  @media (max-width: 440px) {
+    #galleries {
+      flex-direction: column;
+    }
+  }
+  @media (min-width: 440px) {
+    #galleries {
+      width: 85%;
+      margin-top: 2rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    #galleries {
+      margin-top: 2rem;
+      width: 80%;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    #galleries {
+      margin-top: 2rem;
+      width: 70%;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    #galleries {
+      margin-top: 2rem;
+      width: 60%;
+    }
+  }
+
+  @media (min-width: 1440px) {
+    #galleries {
+      margin-top: 2rem;
+      width: 50%;
+    }
+  }
+</style>
