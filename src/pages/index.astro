@@ -39,11 +39,7 @@ const base = import.meta.env.BASE_URL;
   }
 
   function onButtonClick(this: HTMLElement, e: Event) {
-    console.log(this.dataset.route);
-    location.replace(this.dataset.route);
-    // let parent: Div = this.parentNode as Div;
-    // let idx: number = Number(parent?.dataset.index);
-    // processImage(idx);
+    location.replace(this.dataset.route as string | URL);
   }
 </script>
 
