@@ -1,0 +1,28 @@
+---
+import { Image } from 'astro:assets';
+const { route, label, img, comment } = Astro.props;
+---
+
+<div class="home-button" data-route={route}>
+  <h2>{label}</h2>
+  <div class="button-image" >
+    <Image src={img} alt="alt text" />
+  </div>
+  <span>{comment}</span>
+</div>
+
+<style>
+  .home-button {
+    display: flex;
+    flex-direction: column;
+    justify-content: top;
+    align-items: center;
+    padding: 2rem;
+  }
+
+  .home-button:hover {
+    background-color: var(--active-background-color);
+    cursor: pointer;
+  }
+
+</style>
