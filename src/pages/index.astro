@@ -10,38 +10,9 @@ const base = import.meta.env.BASE_URL;
 <Page title="Galleries">
   <div id="galleries">
     <HomeButton route={base + "/fonts"} label="Fonts Gallery" img={fontImg}/>
-    <HomeButton route={base + "/#"} label="Street Art Gallery" img={saImg} comment="Coming soon..."/>
+    <HomeButton route={base + "/streetart"} label="Street Art Gallery" img={saImg} comment="Coming soon..."/>
   </div>
 </Page>
-
-<script>
-  type Divs = NodeListOf<HTMLElement> | null | undefined;
-  type Div = HTMLElement | null | undefined;
-  let content: Element | null = null;
-  let buttons: Divs = null;
-  let details: Divs = null;
-  let currentShownDetail: Div = null;
-  let detailPaneHeight: number = 0;
-  let currentThumbnailHeight: number = 0;
-  let rem: number = 0;
-  let mobileViewBreakpoint: number =  0;
-
-  document.addEventListener('DOMContentLoaded', function () {
-    content = document.querySelector("#galleries");
-    buttons = content?.querySelectorAll('.home-button');
-    addButtonClick();
-  });
-
-  function addButtonClick() {
-    buttons?.forEach(button => {
-      button.addEventListener('click', onButtonClick);
-    });
-  }
-
-  function onButtonClick(this: HTMLElement, e: Event) {
-    location.replace(this.dataset.route as string | URL);
-  }
-</script>
 
 <style>
   #galleries {
@@ -53,16 +24,6 @@ const base = import.meta.env.BASE_URL;
     justify-content: center;
     width: 90%;
     line-height: 160%;
-    gap: 2rem;
-  }
-
-  /* #galleries a {
-    color: var(--main-color);
-    font-weight: 600;
-  }
- */
-
-  .button {
   }
 
   @media (min-width: 360px) {
