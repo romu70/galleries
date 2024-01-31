@@ -15,7 +15,15 @@ const fonts = defineCollection({
   })
 });
 
+const streetarts = defineCollection({
+  type: 'data',
+  schema: ({ image }) => z.object({
+    place: z.string()
+  })
+});
+
 // Export a single `collections` object to register your collection(s)
 export const collections = {
   fonts: fonts,
+  streetarts: streetarts
 };
