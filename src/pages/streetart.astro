@@ -1,9 +1,16 @@
 ---
 import Page from '../layouts/Page.astro';
 import Gallery from '../components/Gallery.astro'
+import { getCollection } from "astro:content";
+import { Debug } from 'astro:components';
+const allSa = await getCollection('streetarts');
+console.log(allSa);
 ---
 
-<Page title="Fonts Gallery">
-  <Gallery />
+<Page title="Street Art Gallery">
+  <div style="width: 50%; margin: auto;">
+    <span style="color: var(--main-color); margin:auto;">Coming soon...</span>
+  </div>
+  <!-- <Gallery /> -->
 </Page>
 
