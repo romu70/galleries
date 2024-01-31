@@ -1,9 +1,28 @@
 ---
 import Page from '../layouts/Page.astro';
 import Gallery from '../components/Gallery.astro'
+import { getCollection } from "astro:content";
+import { Debug } from 'astro:components';
+
+const allFonts = await getCollection('fonts');
+
+// Get type
+type Font = typeof allFonts[0];
+// Most recent item first
+function compare(a: Font, b: Font) {
+  if(a["slug"] > b["slug"]) {
+    return -1;
+  }
+  if(a["slug"] < b["slug"]) {
+    return 1;
+  }
+
+  return 0;
+}
+
 ---
 
 <Page title="Fonts Gallery">
-  <Gallery />
+  <Gallery collection={allFonts} compare={compare} />
 </Page>
 
