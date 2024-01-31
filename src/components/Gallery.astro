@@ -4,21 +4,7 @@ import Item from '../components/Item.astro';
 import { Debug } from 'astro:components';
 import Symbols from "../components/Symbols.astro";
 
-const allFonts = await getCollection('fonts');
-
-// fake type to build
-type Font = typeof allFonts[0];
-// Most recent font first
-function compare(a: Font, b: Font) {
-  if(a["slug"] > b["slug"]) {
-    return -1;
-  }
-  if(a["slug"] < b["slug"]) {
-    return 1;
-  }
-
-  return 0;
-}
+const { collection, compare } = Astro.props;
 ---
 
 <Symbols />
@@ -28,19 +14,14 @@ function compare(a: Font, b: Font) {
 
 <div class="items-grid" id="items-grid">
   {
-    allFonts.sort(compare).map((font, index: number) => (
+    collection.sort(compare).map((item: any, index: number) => (
       // <Debug {font}/>
-      <Item font={font} index={index}/>
+      <Item font={item} index={index}/>
     ))
   }
 </div>
 
 <script>
-// console.log(document.documentElement.clientWidth);
-// console.log(document.documentElement.clientHeight);
-// console.log(window.innerWidth);
-// console.log(window.innerHeight);
-
   type Divs = NodeListOf<HTMLElement> | null | undefined;
   type Div = HTMLElement | null | undefined;
   let grid: Element | null = null;
