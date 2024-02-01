@@ -3,6 +3,7 @@ import Page from '../layouts/Page.astro';
 import Gallery from '../components/Gallery.astro'
 import { getCollection } from "astro:content";
 import { Debug } from 'astro:components';
+import { AstroErrorData } from 'node_modules/astro/dist/core/errors';
 
 const allFonts = await getCollection('fonts');
 
@@ -10,10 +11,10 @@ const allFonts = await getCollection('fonts');
 type Font = typeof allFonts[0];
 // Most recent item first
 function compare(a: Font, b: Font) {
-  if(a["slug"] > b["slug"]) {
+  if(a.data.pubDate > b.data.pubDate) {
     return -1;
   }
-  if(a["slug"] < b["slug"]) {
+  if(a.data.pubDate < b.data.pubDate) {
     return 1;
   }
 
