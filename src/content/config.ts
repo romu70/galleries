@@ -18,7 +18,11 @@ const fonts = defineCollection({
 const streetarts = defineCollection({
   type: 'data',
   schema: ({ image }) => z.object({
-    place: z.string()
+    place: z.string(),
+    pubDate: z.string(),
+    geo: z.string(),
+    imageFile: z.string(),
+    imageAlt: z.string()
   })
 });
 
