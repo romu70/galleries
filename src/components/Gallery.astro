@@ -15,7 +15,7 @@ const { collection, compare } = Astro.props;
 <div class="items-grid" id="items-grid">
   {
     collection.sort(compare).map((item: any, index: number) => (
-      // <Debug {font}/>
+      // <Debug {item}/>
       <Item font={item} index={index}/>
     ))
   }
