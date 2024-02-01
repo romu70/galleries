@@ -5,12 +5,27 @@ import { getCollection } from "astro:content";
 import { Debug } from 'astro:components';
 const allSa = await getCollection('streetarts');
 console.log(allSa);
+
+// Get type
+type Sa = typeof allSa[0];
+// Most recent item first
+function compare(a: Sa, b: Sa) {
+  if(a.data.pubDate > b.data.pubDate) {
+    return -1;
+  }
+  if(a.data.pubDate < b.data.pubDate) {
+    return 1;
+  }
+
+  return 0;
+}
+
 ---
 
 <Page title="Street Art Gallery">
   <div style="width: 50%; margin: auto;">
     <span style="color: var(--main-color); margin:auto;">Coming soon...</span>
   </div>
-  <!-- <Gallery /> -->
+  <!-- <Gallery collection={allSa} compare={compare} /> -->
 </Page>
 
