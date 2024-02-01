@@ -3,22 +3,22 @@ import Page from '../layouts/Page.astro';
 import Gallery from '../components/Gallery.astro'
 import { getCollection } from "astro:content";
 import { Debug } from 'astro:components';
-const allSa = await getCollection('streetarts');
-console.log(allSa);
+// const allSa = await getCollection('streetarts');
+// console.log(allSa);
 
-// Get type
-type Sa = typeof allSa[0];
-// Most recent item first
-function compare(a: Sa, b: Sa) {
-  if(a.data.pubDate > b.data.pubDate) {
-    return -1;
-  }
-  if(a.data.pubDate < b.data.pubDate) {
-    return 1;
-  }
+// // Get type
+// type Sa = typeof allSa[0];
+// // Most recent item first
+// function compare(a: Sa, b: Sa) {
+//   if(a.data.pubDate > b.data.pubDate) {
+//     return -1;
+//   }
+//   if(a.data.pubDate < b.data.pubDate) {
+//     return 1;
+//   }
 
-  return 0;
-}
+//   return 0;
+// }
 
 ---
 
