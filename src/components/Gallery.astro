@@ -8,15 +8,12 @@ const { collection, compare } = Astro.props;
 ---
 
 <Symbols />
-<div id="about">
-  <p>I like fonts. As soon as I see one I like in the real life, I take it in picture. This gallery presents all the fonts I've shot and the ones who people sent me. I hope you like it, and if you want to see your fonts here, feel free to contact me on GitHub. Thanks.</p>
-</div>
 
 <div class="items-grid" id="items-grid">
   {
     collection.sort(compare).map((item: any, index: number) => (
       // <Debug {item}/>
-      <Item font={item} index={index}/>
+      <Item item={item} index={index}/>
     ))
   }
 </div>
@@ -261,38 +258,15 @@ const { collection, compare } = Astro.props;
     row-gap: 1rem;
   }
 
-  #about {
-    color: var(--main-color);
-    margin: auto;
-    flex-direction: column;
-    align-content: center;
-    width: 90%;
-    line-height: 160%;
-  }
-
-  #about a {
-    color: var(--main-color);
-    font-weight: 600;
-  }
-
   @media (min-width: 360px) {
     .items-grid {
       grid-template-columns: repeat(1, 1fr);
-    }
-
-    #about {
-      margin-top: 1rem;
     }
   }
 
   @media (min-width: 440px) {
     .items-grid {
       grid-template-columns: repeat(2, 1fr);
-    }
-
-    #about {
-      width: 85%;
-      margin-top: 2rem;
     }
   }
 
@@ -301,11 +275,6 @@ const { collection, compare } = Astro.props;
       grid-template-columns: repeat(3, 1fr);
       margin-bottom: 8rem;
 	  }
-
-    #about {
-      margin-top: 2rem;
-      width: 80%;
-    }
   }
 
   /* Trick for portrait iPad */
@@ -314,21 +283,11 @@ const { collection, compare } = Astro.props;
       grid-template-columns: repeat(3, 1fr);
       margin-bottom: 8rem;
 	  }
-
-    #about {
-      margin-top: 2rem;
-      width: 80%;
-    }
   }
 
   @media only screen and (min-width: 1024px) and (orientation: landscape) { 
     .items-grid {
       grid-template-columns: repeat(4, 1fr);
-    }
-
-    #about {
-      margin-top: 2rem;
-      width: 70%;
     }
   }
 
@@ -336,23 +295,12 @@ const { collection, compare } = Astro.props;
     .items-grid {
       grid-template-columns: repeat(5, 1fr);
     }
-
-    #about {
-      margin-top: 2rem;
-      width: 60%;
-    }
   }
 
   @media (min-width: 1441px) {
     .items-grid {
       grid-template-columns: repeat(6, 1fr);
     }
-
-    #about {
-      margin-top: 2rem;
-      width: 60%;
-    }
   }
 
-  </style>
-  
+</style>

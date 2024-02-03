@@ -4,16 +4,16 @@ import Date from '../components/Date.astro';
 import Location from '../components/Location.astro';
 import { Debug } from 'astro:components';
 
-const { font, index } = Astro.props;
+const { item, index } = Astro.props;
 
 const locationRoot = "https://www.openstreetmap.org/?";
-let url = locationRoot + font.data.geo;
+let url = locationRoot + item.data.geo;
 
 ---
 
 <div class="detail" data-index={index}>
   <div class="detail-left">
-    <Image src={font.data.image.file} alt={font.data.image.alt} data-index={index} />
+    <Image src={item.data.image.file} alt={item.data.image.alt} data-index={index} />
   </div>
     <div class="detail-right">
       <button class="close-button" type="button" aria-label="Close" >
@@ -22,8 +22,8 @@ let url = locationRoot + font.data.geo;
         </svg>
       </button>
       <div class="info">
-        <h2><Location geo={font.data.geo} place={font.data.image.alt + ", " + font.data.place} /></h2>
-        <Date date={font.data.pubDate} />
+        <h2><Location geo={item.data.geo} place={item.data.image.alt + ", " + item.data.place} /></h2>
+        <Date date={item.data.pubDate} />
       </div>
       <button class="location-button"><a href={url} target="_blank">See location</a></button>
       <div class="buttons">

@@ -3,15 +3,15 @@ import { Image } from 'astro:assets';
 import Date from '../components/Date.astro';
 import Location from '../components/Location.astro';
 
-const { font, index } = Astro.props;
+const { item, index } = Astro.props;
 ---
 <div class="thumbnail" data-index={index}>
   <div class="thumbnail-image" >
-    <Image src={font.data.image.file} alt={font.data.image.alt} />
+    <Image src={item.data.image.file} alt={item.data.image.alt} />
   </div>
   <div class="thumbnail-metadata">
-    <Location geo={font.data.geo} place={font.data.image.alt + ", " + font.data.place} />
-    <Date date={font.data.pubDate} />
+    <Location geo={item.data.geo} place={item.data.image.alt + ", " + item.data.place} />
+    <Date date={item.data.pubDate} />
   </div>
 </div>
 
