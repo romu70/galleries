@@ -1,6 +1,6 @@
 ---
 import { Image } from 'astro:assets';
-const { route, label, img, comment } = Astro.props;
+const { route, label, img } = Astro.props;
 ---
 
 <div class="home-button" data-route={route}>
@@ -9,7 +9,6 @@ const { route, label, img, comment } = Astro.props;
     <div class="button-image" >
       <Image src={img} alt="alt text" />
     </div>
-    <span>{comment}</span>
   </a>
 </div>
 
@@ -29,10 +28,6 @@ const { route, label, img, comment } = Astro.props;
 
   .home-button a {
     text-decoration: none;
-  }
-
-  .home-button a span {
-    color: var(--main-color);
   }
 
 </style>
