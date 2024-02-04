@@ -34,7 +34,7 @@ const streetarts = defineCollection({
   type: 'data',
   schema: ({ image }) => z.object({
     place: z.string(),
-    pubDate: z.string(),
+    pubDate: z.coerce.date(),
     geo: z.string(),
     image: z.object({
       file: image(),
