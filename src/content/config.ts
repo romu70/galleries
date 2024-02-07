@@ -1,46 +1,27 @@
 // Import utilities from `astro:content`
-import { z, defineCollection } from "astro:content";
+import { z, defineCollection, type ImageFunction, type SchemaContext } from "astro:content";
 
-// const schema = z.object({
-//   place: z.string(),
-//   pubDate: z.date(),
-//   geo: z.string(),
-//   image: z.object({
-//     file: image(),
-//     alt: z.string(),
-//   }),
-// });
-
-// Define a `type` and `schema` for each collection
-const fonts = defineCollection({
-  type: 'content',
-  schema: ({ image }) => z.object({
-    place: z.string(),
-    pubDate: z.date(),
-    geo: z.string(),
-    image: z.object({
-      file: image(),
-      alt: z.string(),
-    }),
-  })
-});
-
-// const fonts = defineCollection({
-//   type: 'content',
-//   schema: schema
-// });
-
-const streetarts = defineCollection({
-  type: 'data',
-  schema: ({ image }) => z.object({
+function getSchema(params: SchemaContext) {
+  return z.object({
     place: z.string(),
     pubDate: z.coerce.date(),
     geo: z.string(),
     image: z.object({
-      file: image(),
+      file: params.image(),
       alt: z.string(),
     }),
-  })
+  });
+}
+
+// Define a `type` and `schema` for each collection
+const fonts = defineCollection({
+  type: 'content',
+  schema: getSchema,
+});
+
+const streetarts = defineCollection({
+  type: 'data',
+  schema: getSchema,
 });
 
 // Export a single `collections` object to register your collection(s)
