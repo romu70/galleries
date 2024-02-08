@@ -10,7 +10,10 @@ const { item, index } = Astro.props;
     <Image src={item.data.image.file} alt={item.data.image.alt} />
   </div>
   <div class="thumbnail-metadata">
-    <Location geo={item.data.geo} place={item.data.image.alt + ", " + item.data.place} />
+    <div class="thumbnail-metadata-top">
+      <Location geo={item.data.geo} place={item.data.image.alt + ", " + item.data.place} />
+      <div class="tag">{item.data.tag}</div>
+    </div>
     <Date date={item.data.pubDate} />
   </div>
 </div>
@@ -95,6 +98,22 @@ const { item, index } = Astro.props;
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
+  }
+
+  .thumbnail-metadata-top {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .tag {
+    padding: 0.15rem 0.5rem;
+    background-color: var(--main-color);
+    opacity: 0.7;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 0.25rem;
+    margin-bottom: auto;
+    margin-top: auto;
   }
 
 </style>
