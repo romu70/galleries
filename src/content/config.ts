@@ -10,6 +10,7 @@ function getSchema(params: SchemaContext) {
       file: params.image(),
       alt: z.string(),
     }),
+    tag: z.string()
   });
 }
 
