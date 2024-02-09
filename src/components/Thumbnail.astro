@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import Date from '../components/Date.astro';
 import Location from '../components/Location.astro';
+import Tag from '../components/Tag.astro';
 
 const { item, index } = Astro.props;
 ---
@@ -12,7 +13,7 @@ const { item, index } = Astro.props;
   <div class="thumbnail-metadata">
     <div class="thumbnail-metadata-top">
       <Location geo={item.data.geo} place={item.data.image.alt + ", " + item.data.place} />
-      <div class="tag">{item.data.tag}</div>
+      <Tag tag={item.data.tag} />
     </div>
     <Date date={item.data.pubDate} />
   </div>
@@ -103,17 +104,7 @@ const { item, index } = Astro.props;
   .thumbnail-metadata-top {
     display: flex;
     justify-content: space-between;
-  }
-
-  .tag {
-    padding: 0.15rem 0.5rem;
-    background-color: var(--main-color);
-    opacity: 0.7;
-    font-size: 0.75rem;
-    font-weight: 500;
-    border-radius: 0.25rem;
-    margin-bottom: auto;
-    margin-top: auto;
+    gap: 0.5rem;
   }
 
 </style>

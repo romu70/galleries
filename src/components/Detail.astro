@@ -2,7 +2,8 @@
 import { Image } from 'astro:assets';
 import Date from '../components/Date.astro';
 import Location from '../components/Location.astro';
-import { Debug } from 'astro:components';
+import Tag from '../components/Tag.astro';
+// import { Debug } from 'astro:components';
 
 const { item, index } = Astro.props;
 
@@ -22,7 +23,10 @@ let url = locationRoot + item.data.geo;
         </svg>
       </button>
       <div class="info">
-        <h2><Location geo={item.data.geo} place={item.data.image.alt + ", " + item.data.place} /></h2>
+        <div class="info-top">
+          <h2><Location geo={item.data.geo} place={item.data.image.alt + ", " + item.data.place} /></h2>
+          <Tag tag={item.data.tag} />
+        </div>
         <Date date={item.data.pubDate} />
       </div>
       <button class="location-button"><a href={url} target="_blank">See location</a></button>
@@ -78,6 +82,13 @@ let url = locationRoot + item.data.geo;
     display: flex;
     flex-direction: column;
   }
+
+  .info-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+s  }
 
   .buttons {
     display:flex;
