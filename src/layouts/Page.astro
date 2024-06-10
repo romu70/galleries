@@ -1,15 +1,15 @@
 ---
-import Header from '../components/Header.astro';
-import Heading from '../components/Heading.astro';
+import Header from "../components/Header.astro";
+import Heading from "../components/Heading.astro";
 import "../styles/gallery.css";
 const { title, rss } = Astro.props;
-
+const favi = import.meta.env.BASE_URL + "/favicon.svg";
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href={favi} />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
@@ -17,9 +17,9 @@ const { title, rss } = Astro.props;
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
   </head>
   <body>
-    <Header/>
+    <Header />
     <div id="content">
-      <Heading title={title} rss={rss}/>
+      <Heading title={title} rss={rss} />
       <slot />
     </div>
   </body>
@@ -35,5 +35,4 @@ const { title, rss } = Astro.props;
       margin-top: 2rem;
     }
   }
-
 </style>
