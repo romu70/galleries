@@ -12,6 +12,7 @@
   "dependencies": {
     "@astrojs/check": "^0.9.3",
     "@astrojs/rss": "^4.0.7",
+    "@fontsource-variable/montserrat": "^5.0.20",
     "astro": "^4.14.3",
     "typescript": "^5.3.3"
   }
