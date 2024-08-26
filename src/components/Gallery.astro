@@ -235,7 +235,7 @@ const { collection, compare } = Astro.props;
   }
 
   function onDetailCloseClick(this: HTMLElement, e: Event) {
-    hideDetail(this.parentNode?.parentNode as Div);
+    hideDetail(this.parentNode?.parentNode?.parentNode as Div);
   }
 
   function onDetailNextClick(this: HTMLElement, e: Event) {

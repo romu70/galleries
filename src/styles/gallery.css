@@ -7,9 +7,9 @@
   --line-height: 1.25rem;
   font-family: Inter, sans-serif;
   font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
-  --main-color: rgb(245, 222, 179);
+  --main-color: white;
   --aspect-ratio: 1.618; /* golden ratio */
-  --active-background-color: #303030;
+  --active-background-color: #464646;
   --mobile-view-breakpoint: 768; /* px */
   --detail-pane-height: 20rem;
 }
@@ -29,12 +29,15 @@ body {
   /* padding-top: 1%; */
   font-size: 1rem;
   line-height: var(--line-height);
-  background-color: #464646;
+  background-color: #303030;
+  font-family: 'Montserrat Variable', sans-serif;
+  font-weight: lighter;
 }
 
 h1 {
   margin-bottom: 1rem;
   font-size: 3rem;
+  font-weight:lighter;
   line-height: normal;
   text-align: center;
   color:var(--main-color)
@@ -43,6 +46,7 @@ h1 {
 h2 {
   margin-bottom: 1rem;
   font-size: 1.5rem;
+  font-weight:lighter;
   line-height: normal;
   color:var(--main-color)
 }
@@ -58,11 +62,12 @@ svg, svg symbol {
   align-content: center;
   width: 90%;
   line-height: 160%;
+  font-weight:lighter;
 }
 
 #about a {
   color: var(--main-color);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 @media (min-width: 360px) {
