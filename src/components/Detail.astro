@@ -1,39 +1,21 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import Date from '../components/Date.astro';
 import Location from '../components/Location.astro';
 import Tag from '../components/Tag.astro';
 // import { Debug } from 'astro:components';
-
 const { item, index } = Astro.props;
-
-const locationRoot = "https://www.openstreetmap.org/?";
-let url = locationRoot + item.data.geo;
-
-console.log("item.data.image.file", item.data.image.file);
-
+let geoUrl = "https://www.openstreetmap.org/?" + item.data.geo;
+const theImage = await getImage({src: item.data.image.file});
 ---
 
 <div class="detail" data-index={index}>
   <div class="detail-left">
-    <a href={item.data.image.file} target="_blank" rel="noreferrer noopener">
+    <a href={theImage.src} target="_blank" rel="noreferrer noopener">
       <Image src={item.data.image.file} alt={item.data.image.alt} data-index={index} />
     </a>
   </div>
     <div class="detail-right">
-      <!-- <button class="close-button" type="button" aria-label="Close" >
-        <svg class="close-svg" width="16px" height="16px">
-          <use xlink:href="#close" />
-        </svg>
-      </button> -->
-      <div class="info">
-        <div class="info-top">
-          <h2><Location geo={item.data.geo} place={item.data.image.alt + ", " + item.data.place} /></h2>
-          <Tag tag={item.data.tag} />
-        </div>
-        <Date date={item.data.pubDate} />
-      </div>
-      <button class="location-button"><a href={url} target="_blank">See location</a></button>
       <div class="buttons">
         <div class="buttons-left">
           <button class="previous-button" type="button" aria-label="Previous" data-index={index} disabled>
@@ -53,6 +35,14 @@ console.log("item.data.image.file", item.data.image.file);
           </svg>
         </button>
       </div>
+      <div class="info">
+        <div class="info-top">
+          <h2><Location geo={item.data.geo} place={item.data.image.alt + ", " + item.data.place} /></h2>
+          <Tag tag={item.data.tag} />
+        </div>
+        <Date date={item.data.pubDate} />
+      </div>
+      <button class="location-button"><a href={geoUrl} target="_blank">See location</a></button>
   </div>
 </div>
 
