@@ -8,6 +8,9 @@ const base = import.meta.env.BASE_URL;
 ---
 
 <Page title="Galleries">
+  <div id="about">
+    <p>I'm passionate about fonts and street art, capturing both in photos whenever I discover them. This gallery showcases my collection along with contributions from others. Enjoy browsing! To share your own font or street art photos here, contact me on GitHub (link in menu above). Thanks for visiting!</p>
+  </div>
   <div id="galleries">
     <HomeButton route={base + "/fonts"} label="Fonts Gallery" img={fontImg}/>
     <HomeButton route={base + "/streetart"} label="Street Art Gallery" img={saImg} />
@@ -15,7 +18,14 @@ const base = import.meta.env.BASE_URL;
 </Page>
 
 <style>
-  #galleries {
+
+#about {
+  margin: auto;
+  width: 90%;
+  line-height: 160%;
+}
+
+#galleries {
     display: flex;
     color: var(--main-color);
     margin: auto;
@@ -30,7 +40,11 @@ const base = import.meta.env.BASE_URL;
     #galleries {
       margin-top: 1rem;
     }
-  }
+
+    #about {
+      width: 90%;
+    }
+}
 
   @media (max-width: 720px) {
     #galleries {
@@ -42,12 +56,18 @@ const base = import.meta.env.BASE_URL;
       width: 85%;
       margin-top: 2rem;
     }
+    #about {
+      width: 80%;
+    }
   }
 
   @media (min-width: 768px) {
     #galleries {
       margin-top: 2rem;
       width: 80%;
+    }
+    #about {
+      width: 70%;
     }
   }
 
@@ -56,12 +76,18 @@ const base = import.meta.env.BASE_URL;
       margin-top: 2rem;
       width: 70%;
     }
+    #about {
+      width: 60%;
+    }
   }
 
   @media (min-width: 1280px) {
     #galleries {
       margin-top: 2rem;
       width: 60%;
+    }
+    #about {
+      width: 50%;
     }
   }
 
