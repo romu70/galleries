@@ -40,26 +40,6 @@ if (!fs.existsSync(imagesDir)) {
   fs.mkdirSync(imagesDir, { recursive: true });
 }
 
-const today = new Date();
-const year = today.getFullYear();
-const month = (today.getMonth() + 1).toString().padStart(2, '0');
-const day = today.getDate().toString().padStart(2, '0');
-const datePrefix = `${year}-${month}-${day}`;
-
-// Find the starting index for today
-const existingFiles = fs.readdirSync(targetDir);
-let lastIndex = 0;
-existingFiles.forEach(file => {
-  if (file.startsWith(datePrefix)) {
-    const parts = file.split('-');
-    const indexPart = parts[parts.length - 1].split('.')[0];
-    const index = parseInt(indexPart, 10);
-    if (index > lastIndex) {
-      lastIndex = index;
-    }
-  }
-});
-
 const filesToProcess = fs.readdirSync(IMG_SOURCE_DIR).filter(file => {
     // Add filters for common image types, ignoring system files like .DS_Store
     return ['.heic', '.jpg', '.jpeg', '.png', '.webp'].some(ext => file.toLowerCase().endsWith(ext));
@@ -70,52 +50,96 @@ if (filesToProcess.length === 0) {
     process.exit(0);
 }
 
+// Use a map to keep track of the last index used for each date
+const dateIndexMap = new Map();
 
 filesToProcess.forEach((file, i) => {
-  const currentIndex = lastIndex + i + 1;
-  const newIndex = currentIndex.toString().padStart(2, '0');
-  const newBaseName = `${datePrefix}-${newIndex}`;
-  const sourceImagePath = path.join(IMG_SOURCE_DIR, file);
+    const sourceImagePath = path.join(IMG_SOURCE_DIR, file);
+    let datePrefix;
+    let pubDate;
 
-  // Process and save the image
-  const newImageName = `${newBaseName}.jpg`;
-  const destImagePath = path.join(imagesDir, newImageName);
-  console.log(`[${currentIndex}/${filesToProcess.length}] Processing ${file} -> images/${newImageName}`);
-  try {
-    execSync(`sips -Z ${MAX_DIMENSION} -s format jpeg "${sourceImagePath}" --out "${destImagePath}"`);
-  } catch (error) {
-    console.error(`Error processing image ${file}:`, error);
-    return; // Skip to next file
-  }
+    try {
+        // Use mdls to get the content creation date. The -raw flag gives us just the value.
+        const creationDateOutput = execSync(`mdls -name kMDItemContentCreationDate -raw "${sourceImagePath}"`).toString();
+        // The output is a string like "YYYY-MM-DD HH:MM:SS +ZZZZ" which can be parsed by the Date constructor.
+        const creationDate = new Date(creationDateOutput);
 
-  // Create content file
-  const pubDate = today.toISOString();
-  const geo = "0, 0";
-  const place = "City, Country";
-  const tag = "tag";
-  const alt = "A photo of...";
-  const imagePath = `./images/${newImageName}`;
+        pubDate = creationDate.toISOString();
+        const year = creationDate.getFullYear();
+        const month = (creationDate.getMonth() + 1).toString().padStart(2, '0');
+        const day = creationDate.getDate().toString().padStart(2, '0');
+        datePrefix = `${year}-${month}-${day}`;
+    } catch (error) {
+        console.warn(`Warning: Could not read shooting date for ${file}. Falling back to current date.`);
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = (today.getMonth() + 1).toString().padStart(2, '0');
+        const day = today.getDate().toString().padStart(2, '0');
+        datePrefix = `${year}-${month}-${day}`;
+        pubDate = today.toISOString();
+    }
 
-  if (GALLERY_TYPE === 'fonts') {
-    const content = `---\npubDate: ${pubDate}\nimage:\n    file: "${imagePath}"\n    alt: "${alt}"\ngeo: "${geo}"\nplace: "${place}"\ntag: "${tag}"\n---\n`;
-    fs.writeFileSync(path.join(targetDir, `${newBaseName}.md`), content);
-  } else { // streetart
-    const content = {
-      pubDate,
-      image: {
-        file: imagePath,
-        alt
-      },
-      geo,
-      place,
-      tag
-    };
-    fs.writeFileSync(path.join(targetDir, `${newBaseName}.json`), JSON.stringify(content, null, 2));
-  }
+    // Determine the index for the file based on its date
+    if (!dateIndexMap.has(datePrefix)) {
+        // If we haven't seen this date before, find the last index from existing files
+        const existingFiles = fs.readdirSync(targetDir);
+        let lastIndex = 0;
+        existingFiles.forEach(f => {
+            if (f.startsWith(datePrefix)) {
+                const parts = f.split('-');
+                const indexPart = parts[parts.length - 1].split('.')[0];
+                const index = parseInt(indexPart, 10);
+                if (index > lastIndex) {
+                    lastIndex = index;
+                }
+            }
+        });
+        dateIndexMap.set(datePrefix, lastIndex);
+    }
 
-  // Move the original file to the processed directory
-  const processedImagePath = path.join(PROCESSED_DIR, file);
-  fs.renameSync(sourceImagePath, processedImagePath);
+    const newIndexValue = dateIndexMap.get(datePrefix) + 1;
+    dateIndexMap.set(datePrefix, newIndexValue);
+    const newIndex = newIndexValue.toString().padStart(2, '0');
+    const newBaseName = `${datePrefix}-${newIndex}`;
+
+    // Process and save the image
+    const newImageName = `${newBaseName}.jpg`;
+    const destImagePath = path.join(imagesDir, newImageName);
+    console.log(`[${i + 1}/${filesToProcess.length}] Processing ${file} -> images/${newImageName}`);
+    try {
+        execSync(`sips -Z ${MAX_DIMENSION} -s format jpeg "${sourceImagePath}" --out "${destImagePath}"`);
+    } catch (error) {
+        console.error(`Error processing image ${file}:`, error);
+        return; // Skip to next file
+    }
+
+    // Create content file
+    const geo = "0, 0";
+    const place = "City, Country";
+    const tag = "tag";
+    const alt = "A photo of...";
+    const imagePath = `./images/${newImageName}`;
+
+    if (GALLERY_TYPE === 'fonts') {
+        const content = `---\npubDate: ${pubDate}\nimage:\n    file: "${imagePath}"\n    alt: "${alt}"\ngeo: "${geo}"\nplace: "${place}"\ntag: "${tag}"\n---\n`;
+        fs.writeFileSync(path.join(targetDir, `${newBaseName}.md`), content);
+    } else { // streetart
+        const content = {
+            pubDate,
+            image: {
+                file: imagePath,
+                alt
+            },
+            geo,
+            place,
+            tag
+        };
+        fs.writeFileSync(path.join(targetDir, `${newBaseName}.json`), JSON.stringify(content, null, 2));
+    }
+
+    // Move the original file to the processed directory
+    const processedImagePath = path.join(PROCESSED_DIR, file);
+    fs.renameSync(sourceImagePath, processedImagePath);
 });
 
 console.log("\nDone!");
