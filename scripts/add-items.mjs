@@ -64,7 +64,7 @@ filesToProcess.forEach((file, i) => {
         // The output is a string like "YYYY-MM-DD HH:MM:SS +ZZZZ" which can be parsed by the Date constructor.
         const creationDate = new Date(creationDateOutput);
 
-        pubDate = creationDate.toISOString();
+        pubDate = creationDate.toISOString().split('T')[0];
         const year = creationDate.getFullYear();
         const month = (creationDate.getMonth() + 1).toString().padStart(2, '0');
         const day = creationDate.getDate().toString().padStart(2, '0');
@@ -76,7 +76,7 @@ filesToProcess.forEach((file, i) => {
         const month = (today.getMonth() + 1).toString().padStart(2, '0');
         const day = today.getDate().toString().padStart(2, '0');
         datePrefix = `${year}-${month}-${day}`;
-        pubDate = today.toISOString();
+        pubDate = today.toISOString().split('T')[0];
     }
 
     // Determine the index for the file based on its date
