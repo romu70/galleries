@@ -1,7 +1,43 @@
 
+/**
+ * @file scripts/add-items.mjs
+ * @description Automates the process of adding new image items to the Astro galleries project.
+ *              It handles image processing (conversion, resizing), metadata extraction (shooting date, GPS),
+ *              reverse geocoding for location, and content file generation.
+ *
+ * @usage
+ *   1. Place your new image files (HEIC, JPG, PNG, etc.) into the 'inbox/' directory at the project root.
+ *   2. Run the script from your terminal using npm:
+ *      `npm run add-items -- <gallery-type>`
+ *      Replace `<gallery-type>` with either 'fonts' or 'streetarts'.
+ *      Example: `npm run add-items -- streetarts`
+ *
+ * @input
+ *   - Image files in the 'inbox/' directory.
+ *
+ * @output
+ *   - Processed JPG images (resized to MAX_DIMENSION) are saved to 'src/content/<gallery-type>/images/'.
+ *   - Corresponding content files (.md for 'fonts', .json for 'streetarts') are created in 'src/content/<gallery-type>/'.
+ *   - Original image files from 'inbox/' are moved to 'inbox/processed/' for archiving.
+ *
+ * @features
+ *   - Converts HEIC/PNG/etc. to JPG.
+ *   - Resizes images to a maximum dimension of 1600px.
+ *   - Extracts shooting date from image metadata for filenames (YYYY-MM-DD-II) and 'pubDate'.
+ *   - Extracts GPS coordinates from image metadata for the 'geo' field (mlat=<lat>&mlon=<lon>#map=19/<lat>/<lon>).
+ *   - Performs reverse geocoding using OpenStreetMap Nominatim API to determine 'place' (City, Country).
+ *   - Handles incremental indexing for files shot on the same day.
+ *
+ * @manual_steps_remaining
+ *   - After running the script, you must manually edit the generated content files to:
+ *     - Update the 'tag' field.
+ *     - Update the 'alt' (alternative text) field for accessibility.
+ */
+
 import fs from 'fs';
 import path from 'path';
 import { execSync } from 'child_process';
+
 
 // --- CONFIGURATION ---
 const MAX_DIMENSION = 1600;
@@ -124,7 +160,7 @@ filesToProcess.forEach((file, i) => {
         const lon = parseFloat(lonOutput);
 
         if (!isNaN(lat) && !isNaN(lon)) {
-            geo = `${lat}, ${lon}`;
+            geo = `mlat=${lat}&mlon=${lon}#map=19/${lat}/${lon}`;
             console.log(`  Found GPS: ${geo}`);
 
             // Reverse geocode using OpenStreetMap
