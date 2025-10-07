@@ -185,7 +185,7 @@ filesToProcess.forEach((file, i) => {
         console.warn(`  Warning: No GPS data found for ${file}.`);
     }
 
-    const tag = "tag";
+    const tag = GALLERY_TYPE === 'streetarts' ? "unknown" : (GALLERY_TYPE === 'fonts' ? "Serif" : "tag");
     const alt = "A photo of...";
     const imagePath = `./images/${newImageName}`;
 
