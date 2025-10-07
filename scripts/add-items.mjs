@@ -113,9 +113,42 @@ filesToProcess.forEach((file, i) => {
         return; // Skip to next file
     }
 
-    // Create content file
-    const geo = "0, 0";
-    const place = "City, Country";
+    // --- Metadata Extraction ---
+    let geo = "0, 0";
+    let place = "City, Country";
+
+    try {
+        const latOutput = execSync(`mdls -name kMDItemLatitude -raw "${sourceImagePath}"`).toString();
+        const lonOutput = execSync(`mdls -name kMDItemLongitude -raw "${sourceImagePath}"`).toString();
+        const lat = parseFloat(latOutput);
+        const lon = parseFloat(lonOutput);
+
+        if (!isNaN(lat) && !isNaN(lon)) {
+            geo = `${lat}, ${lon}`;
+            console.log(`  Found GPS: ${geo}`);
+
+            // Reverse geocode using OpenStreetMap
+            try {
+                const agent = "GeminiCLI/1.0 (https://gemini.google.com/)";
+                const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`;
+                const geoResponse = execSync(`curl -s -A "${agent}" "${url}"`).toString();
+                const geoJson = JSON.parse(geoResponse);
+                if (geoJson.address) {
+                    const city = geoJson.address.city || geoJson.address.town || geoJson.address.village || '';
+                    const country = geoJson.address.country || '';
+                    if (city && country) {
+                        place = `${city}, ${country}`;
+                        console.log(`  Found Place: ${place}`);
+                    }
+                }
+            } catch (geoError) {
+                console.warn(`  Warning: Could not reverse geocode for ${file}.`);
+            }
+        }
+    } catch (gpsError) {
+        console.warn(`  Warning: No GPS data found for ${file}.`);
+    }
+
     const tag = "tag";
     const alt = "A photo of...";
     const imagePath = `./images/${newImageName}`;
