@@ -213,7 +213,7 @@ filesToProcess.forEach((file, i) => {
       : GALLERY_TYPE === "fonts"
         ? "Serif"
         : "tag";
-  const alt = "Unknown";
+  const alt = newBaseName;
   const imagePath = `./images/${newImageName}`;
 
   if (GALLERY_TYPE === "fonts") {
