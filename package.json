@@ -11,10 +11,10 @@
     "add-items": "node scripts/add-items.mjs"
   },
   "dependencies": {
-    "@astrojs/check": "^0.9.4",
-    "@astrojs/rss": "^4.0.12",
+    "@astrojs/check": "^0.9.6",
+    "@astrojs/rss": "^4.0.14",
     "@fontsource-variable/montserrat": "^5.0.20",
-    "astro": "^5.14.1",
+    "astro": "^5.16.4",
     "typescript": "^5.3.3"
   }
 }
