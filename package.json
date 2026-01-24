@@ -12,9 +12,9 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.6",
-    "@astrojs/rss": "^4.0.14",
+    "@astrojs/rss": "^4.0.15",
     "@fontsource-variable/montserrat": "^5.0.20",
-    "astro": "^5.16.4",
+    "astro": "^5.16.15",
     "typescript": "^5.3.3"
   }
 }
