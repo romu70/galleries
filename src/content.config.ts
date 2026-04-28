@@ -1,5 +1,6 @@
-// Import utilities from `astro:content`
-import { z, defineCollection, type ImageFunction, type SchemaContext } from "astro:content";
+import { z } from "astro/zod";
+import { defineCollection, type SchemaContext } from "astro:content";
+import { glob } from "astro/loaders";
 
 function getSchema(params: SchemaContext) {
   return z.object({
@@ -10,23 +11,22 @@ function getSchema(params: SchemaContext) {
       file: params.image(),
       alt: z.string(),
     }),
-    tag: z.string()
+    tag: z.string(),
   });
 }
 
-// Define a `type` and `schema` for each collection
 const fonts = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: "**/*.md", base: "./src/content/fonts" }),
   schema: getSchema,
 });
 
 const streetarts = defineCollection({
-  type: 'data',
+  loader: glob({ pattern: "**/*.json", base: "./src/content/streetarts" }),
   schema: getSchema,
 });
 
 // Export a single `collections` object to register your collection(s)
 export const collections = {
   fonts: fonts,
-  streetarts: streetarts
+  streetarts: streetarts,
 };
