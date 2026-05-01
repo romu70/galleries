@@ -9,6 +9,11 @@ const { collection, compare } = Astro.props;
 
 <Symbols />
 
+<div id="filter-indicator" class="filter-indicator">
+  Filtered by: <span id="filter-label"></span>
+  <button id="filter-clear" aria-label="Clear filter">✕</button>
+</div>
+
 <div class="items-grid" id="items-grid">
   {
     collection.sort(compare).map((item: any, index: number) => (
@@ -28,27 +33,84 @@ const { collection, compare } = Astro.props;
   let detailPaneHeight: number = 0;
   let currentThumbnailHeight: number = 0;
   let rem: number = 0;
-  let mobileViewBreakpoint: number =  0;
+  let mobileViewBreakpoint: number = 0;
+  let currentFilter: string | null = null;
+  let visibleThumbnails: HTMLElement[] = [];
 
   // Init
   document.addEventListener('DOMContentLoaded', function () {
     grid = document.querySelector("#items-grid");
     thumbnails = grid?.querySelectorAll('.thumbnail');
     details = grid?.querySelectorAll('.detail');
+    visibleThumbnails = Array.from(thumbnails || []);
     hideAllDetails();
     addThumbnailImageClick();
     addKeyboardManagement();
+    addTagClick();
     addDetailClick('.close-button', onDetailCloseClick);
     addDetailClick('.next-button', onDetailNextClick);
     addDetailClick('.previous-button', onDetailPreviousClick);
+    document.getElementById('filter-clear')?.addEventListener('click', clearFilter);
     detailPaneHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--detail-pane-height'));
     rem = parseInt(getComputedStyle(document.documentElement).fontSize);
-    mobileViewBreakpoint =  parseInt(getComputedStyle(document.documentElement).getPropertyValue('--mobile-view-breakpoint'));
+    mobileViewBreakpoint = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--mobile-view-breakpoint'));
   });
 
   function addThumbnailImageClick() {
     thumbnails?.forEach(thumbnail => {
       thumbnail.children[0].addEventListener('click', onThumbnailImageClick);
+    });
+  }
+
+  function addTagClick() {
+    document.addEventListener('click', (e) => {
+      const tag = (e.target as HTMLElement).closest('.tag') as HTMLElement | null;
+      if (!tag) return;
+      const tagName = tag.dataset.tag;
+      if (!tagName) return;
+      if (currentFilter === tagName) {
+        clearFilter();
+      } else {
+        filterByTag(tagName);
+      }
+    });
+  }
+
+  function filterByTag(tag: string) {
+    hideDetail(currentShownDetail);
+    currentFilter = tag;
+
+    grid?.querySelectorAll<HTMLElement>('.item').forEach(item => {
+      const itemTag = item.querySelector<HTMLElement>('.tag')?.dataset.tag;
+      item.style.display = itemTag === tag ? '' : 'none';
+    });
+
+    visibleThumbnails = Array.from(thumbnails || []).filter(
+      t => (t.closest('.item') as HTMLElement | null)?.style.display !== 'none'
+    );
+
+    const label = document.getElementById('filter-label');
+    if (label) label.textContent = tag;
+    document.getElementById('filter-indicator')?.classList.add('visible');
+
+    grid?.querySelectorAll<HTMLElement>('.tag').forEach(t => {
+      t.classList.toggle('active', t.dataset.tag === tag);
+    });
+  }
+
+  function clearFilter() {
+    currentFilter = null;
+
+    grid?.querySelectorAll<HTMLElement>('.item').forEach(item => {
+      item.style.display = '';
+    });
+
+    visibleThumbnails = Array.from(thumbnails || []);
+
+    document.getElementById('filter-indicator')?.classList.remove('visible');
+
+    grid?.querySelectorAll<HTMLElement>('.tag').forEach(t => {
+      t.classList.remove('active');
     });
   }
 
@@ -185,32 +247,19 @@ const { collection, compare } = Astro.props;
   }
 
   function processImage(index: number) {
-    // Get the clicked detail element
     let detail: Div = grid?.querySelector(`.detail[data-index="${index}"]`);
 
-    // If the already open item is clicked,
-    // then it's closed
     if(currentShownDetail == detail) {
       hideDetail(currentShownDetail);
-    }
-    else {
-      // If another item is clicked,
-      // we close the already open one and then
-      // we open the new one
+    } else {
       hideDetail(currentShownDetail);
       showDetail(detail);
 
-      // Set active the previous button if the index is > 0
-      if(index > 0) {
-        let button = grid?.querySelector(`.detail[data-index="${index}"] .previous-button`);
-        button?.removeAttribute("disabled");
-      }
-
-      // Set active the next button if the index is > 0
-      if(thumbnails && index == (thumbnails?.length - 1)) {
-        let button = grid?.querySelector(`.detail[data-index="${index}"] .next-button`);
-        button?.setAttribute("disabled", "");
-      }
+      const visibleIdx = visibleThumbnails.findIndex(t => Number(t.dataset.index) === index);
+      const prevButton = grid?.querySelector<HTMLButtonElement>(`.detail[data-index="${index}"] .previous-button`);
+      const nextButton = grid?.querySelector<HTMLButtonElement>(`.detail[data-index="${index}"] .next-button`);
+      if (prevButton) prevButton.disabled = visibleIdx <= 0;
+      if (nextButton) nextButton.disabled = visibleIdx >= visibleThumbnails.length - 1;
     }
   }
 
@@ -239,17 +288,56 @@ const { collection, compare } = Astro.props;
   }
 
   function onDetailNextClick(this: HTMLElement, e: Event) {
-    let idx: number = Number(this.dataset.index);
-    processImage(idx + 1)
+    const idx = Number(this.dataset.index);
+    const visibleIdx = visibleThumbnails.findIndex(t => Number(t.dataset.index) === idx);
+    if (visibleIdx < visibleThumbnails.length - 1) {
+      processImage(Number(visibleThumbnails[visibleIdx + 1].dataset.index));
+    }
   }
 
   function onDetailPreviousClick(this: HTMLElement, e: Event) {
-    let idx: number = Number(this.dataset.index);
-    processImage(idx - 1)
+    const idx = Number(this.dataset.index);
+    const visibleIdx = visibleThumbnails.findIndex(t => Number(t.dataset.index) === idx);
+    if (visibleIdx > 0) {
+      processImage(Number(visibleThumbnails[visibleIdx - 1].dataset.index));
+    }
   }
 </script>
 
 <style>
+  .filter-indicator {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+    color: white;
+  }
+
+  .filter-indicator.visible {
+    display: flex;
+  }
+
+  #filter-clear {
+    background: transparent;
+    border: 1px solid var(--main-color);
+    color: var(--main-color);
+    border-radius: 100%;
+    width: 1.4rem;
+    height: 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.7rem;
+    padding: 0;
+  }
+
+  #filter-clear:hover {
+    background-color: var(--main-color);
+    color: var(--active-background-color);
+  }
+
   .items-grid {
     display: grid;
     grid-template-columns: repeat(1, 1fr);

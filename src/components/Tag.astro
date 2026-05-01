@@ -2,7 +2,7 @@
 const { tag } = Astro.props;
 ---
 
-<div class="tag">{tag}</div>
+<div class="tag" data-tag={tag}>{tag}</div>
 
 <style>
   .tag {
@@ -13,9 +13,16 @@ const { tag } = Astro.props;
     font-weight: 500;
     border-radius: 0.25rem;
     margin-bottom: auto;
-    /* text-overflow: ellipsis;
-    overflow: hidden; */
     white-space: nowrap;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .tag:hover,
+  .tag.active {
+    opacity: 1;
+    outline: 2px solid var(--main-color);
+    outline-offset: 2px;
   }
 </style>
 
