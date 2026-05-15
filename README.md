@@ -1,5 +1,7 @@
 # Galleries
 
+Public URL: https://romu70.github.io/galleries
+
 This is my hobby project to learn web development. The galleries website is made thanks to the fantastic [Astro](https://astro.build) framework.
 
 This first gallery displays images of cool fonts found in read life. Interested to give some examples? Contact me here, I think through issues, it will be great.
