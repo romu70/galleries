@@ -79,8 +79,9 @@ const { collection, compare } = Astro.props;
     currentFilter = tag;
 
     grid?.querySelectorAll<HTMLElement>('.item').forEach(item => {
-      const itemTag = item.querySelector<HTMLElement>('.tag')?.dataset.tag;
-      item.style.display = itemTag === tag ? '' : 'none';
+      const chips = Array.from(item.querySelectorAll<HTMLElement>('.tag'));
+      const matches = chips.some(chip => chip.dataset.tag === tag);
+      item.style.display = matches ? '' : 'none';
     });
 
     visibleThumbnails = Array.from(thumbnails || []).filter(

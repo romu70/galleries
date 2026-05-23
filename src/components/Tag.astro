@@ -1,10 +1,22 @@
 ---
 const { tag } = Astro.props;
+const artists = tag.split('+').map((a: string) => a.trim());
 ---
 
-<div class="tag" data-tag={tag}>{tag}</div>
+<div class="tags">
+  {artists.map((artist: string) => (
+    <span class="tag" data-tag={artist}>{artist}</span>
+  ))}
+</div>
 
 <style>
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-bottom: auto;
+  }
+
   .tag {
     padding: 0.15rem 0.5rem;
     background-color: var(--main-color);
@@ -12,7 +24,6 @@ const { tag } = Astro.props;
     font-size: 0.75rem;
     font-weight: 500;
     border-radius: 0.25rem;
-    margin-bottom: auto;
     white-space: nowrap;
     cursor: pointer;
     transition: opacity 0.2s;
