@@ -36,8 +36,10 @@ Find HEIC files in `~/Downloads` that **arrived on this Mac in the last 5 minute
 This is equivalent to Spotlight's `kMDItemDateAdded`, but `find -cmin` is one command and doesn't depend on Spotlight indexing.
 
 ```bash
-find ~/Downloads -maxdepth 1 -type f -iname '*.heic' -cmin -5
+/usr/bin/find ~/Downloads -maxdepth 1 -type f -iname '*.heic' -cmin -5
 ```
+
+**Always use `/usr/bin/find` directly** — the `rtk` proxy installed in this project intercepts `find` and rejects compound predicates (flags like `-iname` combined with `-cmin`), causing a hard error. Bypass it by calling the absolute path.
 
 Notes:
 - Case-insensitive: matches `.HEIC`, `.heic`, and double extensions like `.HEIC.heic`.
@@ -136,8 +138,8 @@ Group approved items by collection (`fonts` vs `streetarts`). For **each group**
    ```
    Map new files back to source HEIC by **mtime-sorted order** — the script processes `readdirSync` order, which on macOS is generally alphabetical. To be safe, sort the staged inbox files alphabetically and pair them with the new entries sorted alphabetically.
 5. **Patch each new entry** with the vision-derived `tag` and `alt`:
-   - Fonts (Markdown): use Edit to replace `alt: "<basename>"` → `alt: "<vision-alt>"` and `tag: "Serif"` → `tag: "<font_category>"`.
-   - Streetarts (JSON): use Edit to replace the `"alt": "<basename>"` and `"tag": "unknown"` lines with the vision values.
+   - First, **Read all new entry files in parallel** (one Read tool call per file in a single message). The Edit tool requires a prior Read in the same session — skipping this causes every edit to fail.
+   - Then apply edits in parallel: Fonts (Markdown): replace `alt: "<basename>"` → `alt: "<vision-alt>"` and `tag: "Serif"` → `tag: "<font_category>"`. Streetarts (JSON): replace `"alt": "<basename>"` and `"tag": "unknown"` with the vision values.
 6. **Clean up Downloads on success only**: delete the approved HEIC files from `~/Downloads`. Skipped files stay put. Never delete a file you couldn't confirm was successfully patched.
 
 ### Step 7 — Report
