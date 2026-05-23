@@ -7,7 +7,7 @@ const { route, label, img } = Astro.props;
   <a href={route}>
     <h2>{label}</h2>
     <div class="button-image" >
-      <Image src={img} alt="alt text" />
+      <Image src={img} alt={label} />
     </div>
   </a>
 </div>
@@ -16,7 +16,7 @@ const { route, label, img } = Astro.props;
   .home-button {
     display: flex;
     flex-direction: column;
-    justify-content: top;
+    justify-content: flex-start;
     align-items: center;
     padding: 2rem;
   }
