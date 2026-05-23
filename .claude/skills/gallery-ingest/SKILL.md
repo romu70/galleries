@@ -115,6 +115,14 @@ After the user responds, partition the items:
 - `edits` — apply user-supplied overrides to the record before Step 6.
 
 ### Step 6 — Stage, run script, patch
+**Before doing anything else in this step**, stop the Astro dev server if it is running. The dev server watches `src/content/` and reacts to every file write — multiple rapid writes from the script plus the patch edits overwhelm its content layer and crash it. Stopping it first is the only reliable fix.
+
+```bash
+pkill -f "astro dev" 2>/dev/null || true
+```
+
+This is safe: `|| true` prevents an error if no process is found. Note that the user will need to run `npm run dev` again after the skill completes.
+
 Group approved items by collection (`fonts` vs `streetarts`). For **each group**, in series (the script's date-index map is per-invocation and serial avoids collisions):
 
 1. **Snapshot the target dir** so we can identify newly-created entries:
@@ -142,12 +150,19 @@ Group approved items by collection (`fonts` vs `streetarts`). For **each group**
    - Then apply edits in parallel: Fonts (Markdown): replace `alt: "<basename>"` → `alt: "<vision-alt>"` and `tag: "Serif"` → `tag: "<font_category>"`. Streetarts (JSON): replace `"alt": "<basename>"` and `"tag": "unknown"` with the vision values.
 6. **Clean up Downloads on success only**: delete the approved HEIC files from `~/Downloads`. Skipped files stay put. Never delete a file you couldn't confirm was successfully patched.
 
+7. **Re-sync the content layer**:
+   ```bash
+   npx astro sync
+   ```
+   Run once after all groups are patched. Since the dev server was stopped in step 0, this rebuilds the content store cleanly so it is ready when the user restarts the server.
+
 ### Step 7 — Report
 End with a short summary:
 - `N` entries created in `fonts`, `M` in `streetarts`.
 - Items flagged for manual follow-up (e.g. streetarts with `artist=unknown` and medium/low confidence — list their entry filenames so the user can revisit).
 - Skipped files (with reason).
 - Any errors (script failure, patching failure, parse failure).
+- Remind the user to run `npm run dev` to restart the dev server.
 
 Do NOT commit, push, or open a PR. Stop at the report.
 
