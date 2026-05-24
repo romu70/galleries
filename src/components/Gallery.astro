@@ -115,40 +115,30 @@ const { collection, compare } = Astro.props;
 
   function addKeyboardManagement() {
     document.addEventListener("keyup", (event) => {
-      // console.log(`Key "${event.key}" released [event: keyup]`);
-      // console.log(event);
-      // console.log("current index: " + currentShownDetail);
-      if (event.defaultPrevented) {
-        return; // Do nothing if the event was already processed
-      };
+      if (event.defaultPrevented) return;
 
       switch (event.key) {
-        case "ArrowDown":
-          // Open the currectly selected thumbnail if any
+        case "ArrowLeft": {
+          if (!currentShownDetail) return;
+          const idx = Number(currentShownDetail.dataset.index);
+          const visibleIdx = visibleThumbnails.findIndex(t => Number(t.dataset.index) === idx);
+          if (visibleIdx > 0) processImage(Number(visibleThumbnails[visibleIdx - 1].dataset.index));
           break;
-        case "ArrowUp":
-          // Close the currectly selected thumbnail if any
+        }
+        case "ArrowRight": {
+          if (!currentShownDetail) return;
+          const idx = Number(currentShownDetail.dataset.index);
+          const visibleIdx = visibleThumbnails.findIndex(t => Number(t.dataset.index) === idx);
+          if (visibleIdx < visibleThumbnails.length - 1) processImage(Number(visibleThumbnails[visibleIdx + 1].dataset.index));
           break;
-        case "ArrowLeft":
-          // Previous thumbnail
-          break;
-        case "ArrowRight":
-          // Next thumbnail
-          break;
-        case "Enter":
-          // Open the currectly selected thumbnail if any
-          break;
-        case " ":
-          // Open or close the currectly selected thumbnail if any
-          break;
+        }
         case "Escape":
-          // Close the currectly selected thumbnail if any
+          hideDetail(currentShownDetail);
           break;
         default:
-          return; // Quit when this doesn't handle the key event.
-      };
+          return;
+      }
 
-      // Cancel the default action to avoid it being handled twice
       event.preventDefault();
     });
   }
