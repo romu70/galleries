@@ -1,6 +1,6 @@
 ---
 name: gallery-ingest
-description: Ingest fresh iPhone HEIC photos from ~/Downloads into the Astro Galleries project. Classifies each photo as fonts vs streetarts, generates frontmatter (tag, alt) with a vision sub-agent, asks the user to approve a batch, then runs the existing add-items script and patches the generated entries. Trigger when the user says things like "ingest photos", "process the new gallery photos", "import the downloads", or mentions HEIC files waiting to be added.
+description: Ingest fresh iPhone HEIC photos from ~/Downloads into the Astro Galleries project. Classifies each photo as fonts vs streetarts, generates the tag with a vision sub-agent, asks the user to approve a batch, then runs the existing add-items script and patches the generated entries. Trigger when the user says things like "ingest photos", "process the new gallery photos", "import the downloads", or mentions HEIC files waiting to be added.
 ---
 
 # Gallery Ingest
@@ -9,15 +9,12 @@ End-to-end pipeline for taking fresh HEIC photos from `~/Downloads` and turning 
 
 ## Project facts (load before doing anything)
 
-- **Collections**: `fonts` (Markdown `.md` entries) and `streetarts` (JSON `.json` entries). Schemas are identical (`src/content.config.ts`): `{ place, pubDate, geo, image: { file, alt }, tag }`. There is no `artist` field — for streetarts, the artist goes in `tag`.
+- **Collections**: `fonts` (Markdown `.md` entries) and `streetarts` (JSON `.json` entries). Schemas are identical (`src/content.config.ts`): `{ place, pubDate, geo, image: { file }, tag }`. There is no `artist` field — for streetarts, the artist goes in `tag`.
 - **Existing script**: `scripts/add-items.mjs`, invoked as `npm run add-items -- fonts` or `npm run add-items -- streetarts`. Reads from `inbox/`, NOT from `~/Downloads`. Handles HEIC→JPG conversion, resize, date+GPS extraction, reverse geocoding, filename indexing, and moves originals to `inbox/processed/`.
-- **What the script leaves blank**: `tag` (set to `"Serif"` or `"unknown"` as placeholder) and `alt` (set to the basename). This skill's job is to fill those two fields with vision-derived values.
+- **What the script leaves blank**: `tag` (set to `"Serif"` or `"unknown"` as placeholder). This skill's job is to fill that field with a vision-derived value.
 - **Tag conventions** (match existing data, do not invent new casings):
   - Fonts: `"Serif"`, `"Sans-Serif"`, `"Cursive"` (capitalized, hyphenated).
   - Streetarts: the artist's signature/tag exactly as written if legible, otherwise the string `"unknown"`. Never use `null` — the schema requires a string.
-- **Alt conventions**:
-  - Fonts: the word or short phrase visible in the photo (e.g. `"Canonica"`, `"Bakery"`).
-  - Streetarts: a short descriptive title of the work (e.g. `"Vampire"`, `"Bald Eagle"`, `"30 Moult 1/2"`).
 
 ## Pipeline
 
@@ -73,8 +70,8 @@ For each temp JPG, spawn a sub-agent (single message, multiple `Agent` tool call
 > - `skip` — anything else (screenshots, receipts, food, people, blurry, etc.).
 >
 > Rules:
-> 1. If the photo is fonts: pick `font_category` from exactly one of `Serif`, `Sans-Serif`, `Cursive`. Set `alt` to the word/phrase visible in the photo (e.g. "Canonica"). Set `artist` to `null`.
-> 2. If the photo is streetarts: set `font_category` to `null`. Set `alt` to a short descriptive title of the work (2–5 words). For `artist`, **only** transcribe a signature or tag that is clearly legible in the image. If you cannot read it with high confidence, output the string `unknown` — do NOT guess or hallucinate names.
+> 1. If the photo is fonts: pick `font_category` from exactly one of `Serif`, `Sans-Serif`, `Cursive`. Set `artist` to `null`.
+> 2. If the photo is streetarts: set `font_category` to `null`. For `artist`, **only** transcribe a signature or tag that is clearly legible in the image. If you cannot read it with high confidence, output the string `unknown` — do NOT guess or hallucinate names.
 > 3. If the photo is neither: set `collection` to `skip` and leave other fields `null`.
 > 4. Output **only** the YAML block below — no prose, no markdown fences, no preamble, no trailing commentary.
 >
@@ -83,7 +80,6 @@ For each temp JPG, spawn a sub-agent (single message, multiple `Agent` tool call
 > collection: fonts | streetarts | skip
 > font_category: Serif | Sans-Serif | Cursive | null
 > artist: <string or unknown or null>
-> alt: <string or null>
 > description: <one-sentence factual description of the image>
 > tags: [<3 to 6 short keywords>]
 > confidence: low | medium | high
@@ -95,16 +91,16 @@ Parse each sub-agent's reply into a structured record. If a reply contains anyth
 Print a compact table to the user — one row per file. Suggested format:
 
 ```
-[1] IMG_6338.HEIC  → fonts/Sans-Serif       alt="Bakery"         conf=high
-[2] IMG_6421.HEIC  → streetarts/Ben Alpha   alt="Vampire"        conf=medium
-[3] IMG_8486.HEIC  → streetarts/unknown     alt="Bald Eagle"     conf=high  ⚠ artist unknown
+[1] IMG_6338.HEIC  → fonts/Sans-Serif       conf=high
+[2] IMG_6421.HEIC  → streetarts/Ben Alpha   conf=medium
+[3] IMG_8486.HEIC  → streetarts/unknown     conf=high  ⚠ artist unknown
 [4] IMG_9002.HEIC  → skip (screenshot)
 ```
 
 Then ask the user:
 > "Approve all, reject all, or list per-item decisions (e.g. `1 ok, 2 edit tag=Shino, 3 skip`)?"
 
-Accept: `ok` / `approve`, `skip` / `reject`, or `edit <field>=<value>[, <field>=<value>]` (fields: `collection`, `tag`, `alt`).
+Accept: `ok` / `approve`, `skip` / `reject`, or `edit <field>=<value>[, <field>=<value>]` (fields: `collection`, `tag`).
 
 **Do not write anything to disk yet.** No file moves, no script invocation.
 
@@ -145,9 +141,9 @@ Group approved items by collection (`fonts` vs `streetarts`). For **each group**
    diff /tmp/gallery-ingest/before-<collection>.txt /tmp/gallery-ingest/after-<collection>.txt
    ```
    Map new files back to source HEIC by **mtime-sorted order** — the script processes `readdirSync` order, which on macOS is generally alphabetical. To be safe, sort the staged inbox files alphabetically and pair them with the new entries sorted alphabetically.
-5. **Patch each new entry** with the vision-derived `tag` and `alt`:
+5. **Patch each new entry** with the vision-derived `tag`:
    - First, **Read all new entry files in parallel** (one Read tool call per file in a single message). The Edit tool requires a prior Read in the same session — skipping this causes every edit to fail.
-   - Then apply edits in parallel: Fonts (Markdown): replace `alt: "<basename>"` → `alt: "<vision-alt>"` and `tag: "Serif"` → `tag: "<font_category>"`. Streetarts (JSON): replace `"alt": "<basename>"` and `"tag": "unknown"` with the vision values.
+   - Then apply edits in parallel: Fonts (Markdown): replace `tag: "Serif"` → `tag: "<font_category>"`. Streetarts (JSON): replace `"tag": "unknown"` with the vision-derived artist value.
 6. **Clean up Downloads on success only**: delete the approved HEIC files from `~/Downloads`. Skipped files stay put. Never delete a file you couldn't confirm was successfully patched.
 
 7. **Re-sync the content layer**:
