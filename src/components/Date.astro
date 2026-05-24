@@ -1,7 +1,7 @@
 ---
 const { date } = Astro.props;
 
-let outputDate = date.getFullYear() + 
+let outputDate = date.getFullYear() +
                   "-" +
                   (date.getMonth()+1).toString().padStart(2, '0') +
                   "-" +
@@ -11,7 +11,7 @@ let outputDate = date.getFullYear() +
 ---
 
 <div class="pub-date">
-  <span class="label">Added on: </span><span class="value">{outputDate}</span>
+  <span class="value">{outputDate}</span>
 </div>
 
 <style>
