@@ -8,7 +8,7 @@ const { collection, compare } = Astro.props;
 <Symbols />
 
 <div id="filter-indicator" class="filter-indicator">
-  Filtered by: <span id="filter-label"></span>
+  <span id="filter-label"></span>
   <button id="filter-clear" aria-label="Clear filter">✕</button>
 </div>
 
@@ -113,7 +113,7 @@ const { collection, compare } = Astro.props;
     });
   }
 
-  function addKeyboardManagement() {  
+  function addKeyboardManagement() {
     document.addEventListener("keyup", (event) => {
       // console.log(`Key "${event.key}" released [event: keyup]`);
       // console.log(event);
@@ -159,7 +159,7 @@ const { collection, compare } = Astro.props;
       button.addEventListener('click', callback);
     });
   }
-  
+
   function hideAllDetails() {
     details?.forEach(detail => {
       detail.style.visibility = "collapse";
@@ -189,7 +189,7 @@ const { collection, compare } = Astro.props;
         detail.style.height = "100vh";
       } else {
         // Wide view
-        
+
         // Place the detail pane just below the thumbnail's line
         // let thumbnail: Div = grid?.querySelector(`.thumbnail[data-index="${detail.dataset.index}"]`);
         if(thumbnail) {
@@ -365,14 +365,14 @@ const { collection, compare } = Astro.props;
   }
 
   /* Trick for portrait iPad */
-  @media only screen and (min-width: 1024px) and (orientation: portrait) { 
+  @media only screen and (min-width: 1024px) and (orientation: portrait) {
     .items-grid {
       grid-template-columns: repeat(3, 1fr);
       margin-bottom: 8rem;
 	  }
   }
 
-  @media only screen and (min-width: 1024px) and (orientation: landscape) { 
+  @media only screen and (min-width: 1024px) and (orientation: landscape) {
     .items-grid {
       grid-template-columns: repeat(4, 1fr);
     }
