@@ -9,7 +9,6 @@ function getSchema(params: SchemaContext) {
     geo: z.string(),
     image: z.object({
       file: params.image(),
-      alt: z.string(),
     }),
     tag: z.string(),
   });
