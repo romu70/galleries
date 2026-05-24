@@ -12,10 +12,12 @@ const { item, index } = Astro.props;
   </div>
   <div class="thumbnail-metadata">
     <div class="thumbnail-metadata-top">
-      <Location geo={item.data.geo} place={item.data.image.alt + ", " + item.data.place} />
       <Tag tag={item.data.tag} />
     </div>
-    <Date date={item.data.pubDate} />
+    <div class="thumbnail-metadata-bottom">
+      <Date date={item.data.pubDate} />
+      <Location geo={item.data.geo} place={item.data.place} />
+    </div>
   </div>
 </div>
 
@@ -41,7 +43,7 @@ const { item, index } = Astro.props;
   function cropAndPositionImage(img: HTMLImageElement) {
     const imgRatio = img.width / img.height;
 
-    // Get the ratio value declared in the :root CSS section 
+    // Get the ratio value declared in the :root CSS section
     const ratio = getComputedStyle(document.documentElement).getPropertyValue('--aspect-ratio');
     let ratioNum = Number(ratio);
 
@@ -81,7 +83,7 @@ const { item, index } = Astro.props;
     overflow: hidden;
     position: relative;
   }
-  
+
   .thumbnail .thumbnail-image img {
     position: absolute;
     pointer-events: none;
@@ -98,14 +100,20 @@ const { item, index } = Astro.props;
   .thumbnail-metadata {
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
+    gap: 0.6rem;
   }
 
   .thumbnail-metadata-top {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .thumbnail-metadata-bottom {
+    display: flex;
+    align-items: baseline;
     gap: 0.5rem;
   }
 
 </style>
-

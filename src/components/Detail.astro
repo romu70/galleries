@@ -37,10 +37,12 @@ const theImage = await getImage({src: item.data.image.file});
       </div>
       <div class="info">
         <div class="info-top">
-          <h2><Location geo={item.data.geo} place={item.data.image.alt + ", " + item.data.place} /></h2>
           <Tag tag={item.data.tag} />
         </div>
-        <Date date={item.data.pubDate} />
+        <div class="info-bottom">
+          <Date date={item.data.pubDate} />
+          <Location geo={item.data.geo} place={item.data.place} />
+        </div>
       </div>
       <button class="location-button"><a href={geoUrl} target="_blank">See location</a></button>
   </div>
@@ -93,8 +95,14 @@ const theImage = await getImage({src: item.data.image.file});
 
   .info-top {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .info-bottom {
+    display: flex;
+    align-items: baseline;
     gap: 0.5rem;
   }
 
