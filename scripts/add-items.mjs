@@ -30,7 +30,6 @@
  * @manual_steps_remaining
  *   - After running the script, you must manually edit the generated content files to:
  *     - Update the 'tag' field.
- *     - Update the 'alt' (alternative text) field for accessibility.
  */
 
 import fs from "fs";
@@ -97,6 +96,9 @@ filesToProcess.forEach((file, i) => {
   const sourceImagePath = path.join(IMG_SOURCE_DIR, file);
   let datePrefix;
   let pubDate;
+
+  // Force Spotlight to index the file before reading metadata, so mdls never returns (null)
+  try { execSync(`mdimport "${sourceImagePath}"`, { stdio: "ignore" }); } catch (_) {}
 
   try {
     // Use mdls to get the content creation date. The -raw flag gives us just the value.
@@ -213,11 +215,10 @@ filesToProcess.forEach((file, i) => {
       : GALLERY_TYPE === "fonts"
         ? "Serif"
         : "tag";
-  const alt = newBaseName;
   const imagePath = `./images/${newImageName}`;
 
   if (GALLERY_TYPE === "fonts") {
-    const content = `---\npubDate: ${pubDate}\nimage:\n    file: "${imagePath}"\n    alt: "${alt}"\ngeo: "${geo}"\nplace: "${place}"\ntag: "${tag}"\n---\n`;
+    const content = `---\npubDate: ${pubDate}\nimage:\n    file: "${imagePath}"\ngeo: "${geo}"\nplace: "${place}"\ntag: "${tag}"\n---\n`;
     fs.writeFileSync(path.join(targetDir, `${newBaseName}.md`), content);
   } else {
     // streetart
@@ -225,7 +226,6 @@ filesToProcess.forEach((file, i) => {
       pubDate,
       image: {
         file: imagePath,
-        alt,
       },
       geo,
       place,
