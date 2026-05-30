@@ -152,15 +152,26 @@ Group approved items by collection (`fonts` vs `streetarts`). For **each group**
    ```
    Run once after all groups are patched. Since the dev server was stopped in step 0, this rebuilds the content store cleanly so it is ready when the user restarts the server.
 
+8. **Commit the new entries**. Stage only the files this run created — the content entries and their images — then commit:
+   ```bash
+   git add src/content/fonts/<new-entries> src/content/fonts/images/<new-images>
+   git add src/content/streetarts/<new-entries> src/content/streetarts/images/<new-images>
+   git commit -m "$(cat <<'EOF'
+   Add <N> entries (<collections>, <date-range>)
+
+   Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+   EOF
+   )"
+   ```
+   The commit message should summarise what was added, e.g. `Add 4 streetarts entries (2025-06-26 / 2025-06-28)` or `Add 3 fonts + 2 streetarts entries (2025-07-01)`. Only stage files this run produced — never use `git add .` or `git add -A`.
+
 ### Step 7 — Report
 End with a short summary:
 - `N` entries created in `fonts`, `M` in `streetarts`.
 - Items flagged for manual follow-up (e.g. streetarts with `artist=unknown` and medium/low confidence — list their entry filenames so the user can revisit).
 - Skipped files (with reason).
-- Any errors (script failure, patching failure, parse failure).
+- Any errors (script failure, patching failure, parse failure, commit failure).
 - Remind the user to run `npm run dev` to restart the dev server.
-
-Do NOT commit, push, or open a PR. Stop at the report.
 
 ## Constraints and guardrails
 
