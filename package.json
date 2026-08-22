@@ -14,7 +14,7 @@
     "@astrojs/check": "^0.9.10",
     "@astrojs/rss": "^4.0.19",
     "@fontsource-variable/montserrat": "^5.0.20",
-    "astro": "^7.1.6",
+    "astro": "^7.2.4",
     "typescript": "^5.3.3"
   }
 }
