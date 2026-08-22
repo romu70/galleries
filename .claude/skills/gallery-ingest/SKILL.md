@@ -13,8 +13,12 @@ End-to-end pipeline for taking fresh HEIC photos from `~/Downloads` and turning 
 - **Existing script**: `scripts/add-items.mjs`, invoked as `npm run add-items -- fonts` or `npm run add-items -- streetarts`. Reads from `inbox/`, NOT from `~/Downloads`. Handles HEIC→JPG conversion, resize, date+GPS extraction, reverse geocoding, filename indexing, and moves originals to `inbox/processed/`.
 - **What the script leaves blank**: `tag` (set to `"Serif"` or `"unknown"` as placeholder). This skill's job is to fill that field with a vision-derived value.
 - **Tag conventions** (match existing data, do not invent new casings):
-  - Fonts: `"Serif"`, `"Sans-Serif"`, `"Cursive"` (capitalized, hyphenated).
-  - Streetarts: the artist's signature/tag exactly as written if legible, otherwise the string `"unknown"`. Never use `null` — the schema requires a string.
+  - Fonts: `"Serif"`, `"Sans-Serif"`, `"Cursive"` (capitalized, hyphenated). Blackletter/gothic has no category of its own — file it as `"Serif"` and flag it in the report.
+  - Streetarts: the artist's name if legible, otherwise the string `"unknown"`. Never use `null` — the schema requires a string.
+    - Write it as a **normally-spaced human name**, not the verbatim wall signature: `@FrancoMartinez ARTE` → `"Franco Martinez"`.
+    - Join collaborators with **` + `**: a credit reading `Vincenzo Dioniso X Olossolo` → `"Vincenzo Dioniso + Olossolo"`.
+    - Older entries like `GARCIAYESSS` and `JP_gimenez_dibujos` predate this convention. Don't copy them.
+    - Text naming the artwork's **subject or title is never the artist** — `DIEGO` on a Maradona mural, `L'ANGOLO DI SOPHIA LOREN` on a group portrait, a dedication plaque naming Bud Spencer. All of those are `"unknown"`.
 
 ## Pipeline
 
@@ -65,13 +69,13 @@ For each temp JPG, spawn a sub-agent (single message, multiple `Agent` tool call
 > You are classifying a single photo for an Astro gallery site. Read the image at `<jpg-path>` using the Read tool, then output a YAML block describing it.
 >
 > Two possible collections:
-> - `fonts` — photos of typefaces / lettering found in the street.
-> - `streetarts` — murals, paintings, sculptures, graffiti, stickers, public art.
+> - `fonts` — photos of typefaces / lettering found in the street. This includes lettering rendered in unusual media (mosaic tiles, neon, carved stone, painted signs) as long as the subject is the letterforms themselves.
+> - `streetarts` — murals, paintings, sculptures, welded/assembled metal artworks, graffiti, stickers, public art. A mosaic or tile piece that depicts a *scene* rather than letters belongs here, not in `fonts`.
 > - `skip` — anything else (screenshots, receipts, food, people, blurry, etc.).
 >
 > Rules:
 > 1. If the photo is fonts: pick `font_category` from exactly one of `Serif`, `Sans-Serif`, `Cursive`. Set `artist` to `null`.
-> 2. If the photo is streetarts: set `font_category` to `null`. For `artist`, **only** transcribe a signature or tag that is clearly legible in the image. If you cannot read it with high confidence, output the string `unknown` — do NOT guess or hallucinate names.
+> 2. If the photo is streetarts: set `font_category` to `null`. For `artist`, **only** transcribe a signature that is clearly legible AND is plausibly the artist's own. Text naming the artwork's *subject* or *title* is NOT an artist signature — a celebrity's name across a portrait of them, a dedication plaque, a painted caption. In those cases output `unknown`. If you cannot read a signature with high confidence, output `unknown` — do NOT guess or hallucinate names. Format a legible signature as a normally-spaced name (`@FrancoMartinez` → `Franco Martinez`); join collaborators with ` + `.
 > 3. If the photo is neither: set `collection` to `skip` and leave other fields `null`.
 > 4. Output **only** the YAML block below — no prose, no markdown fences, no preamble, no trailing commentary.
 >
@@ -135,12 +139,15 @@ Group approved items by collection (`fonts` vs `streetarts`). For **each group**
    npm run add-items -- <collection>
    ```
    Capture stdout. Abort the group on non-zero exit.
-4. **Diff the target dir** to find the new entry files (`.md` for fonts, `.json` for streetarts):
-   ```bash
-   ls src/content/<collection>/ > /tmp/gallery-ingest/after-<collection>.txt
-   diff /tmp/gallery-ingest/before-<collection>.txt /tmp/gallery-ingest/after-<collection>.txt
+4. **Map source HEICs to new entries by parsing the script's stdout.** It prints one line per file naming both sides of the mapping explicitly:
    ```
-   Map new files back to source HEIC by **mtime-sorted order** — the script processes `readdirSync` order, which on macOS is generally alphabetical. To be safe, sort the staged inbox files alphabetically and pair them with the new entries sorted alphabetically.
+   [1/6] Processing IMG_7769.heic -> images/2025-07-12-01.jpg
+   ```
+   `IMG_7769.heic` → entry `2025-07-12-01` (`.md` for fonts, `.json` for streetarts) and image `2025-07-12-01.jpg`. **Use this, not filename ordering.** The `before`/`after` snapshot from step 1 is only a cross-check that the count of new files matches the count of lines parsed — if they disagree, stop and surface it.
+
+   Do NOT infer the mapping from alphabetical or mtime order. Index numbers do not restart at `01` per run — they continue from whatever already exists for that date, so a run's entries can start at `-06` or `-20`, and a batch can span two dates with independent counters.
+
+   Also scan stdout for `Warning:` lines here — see the EXIF-fallback edge case below.
 5. **Patch each new entry** with the vision-derived `tag`:
    - First, **Read all new entry files in parallel** (one Read tool call per file in a single message). The Edit tool requires a prior Read in the same session — skipping this causes every edit to fail.
    - Then apply edits in parallel: Fonts (Markdown): replace `tag: "Serif"` → `tag: "<font_category>"`. Streetarts (JSON): replace `"tag": "unknown"` with the vision-derived artist value.
