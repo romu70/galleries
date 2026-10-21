@@ -49,10 +49,16 @@ const { collection, compare } = Astro.props;
     addDetailClick('.next-button', onDetailNextClick);
     addDetailClick('.previous-button', onDetailPreviousClick);
     document.getElementById('filter-clear')?.addEventListener('click', clearFilter);
-    detailPaneHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--detail-pane-height'));
-    rem = parseInt(getComputedStyle(document.documentElement).fontSize);
-    mobileViewBreakpoint = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--mobile-view-breakpoint'));
   });
+
+  // Read the CSS variables when needed, not at DOMContentLoaded: Safari can fire
+  // it before the stylesheets are applied, and the values would then be NaN.
+  function readCssVariables() {
+    const rootStyle = getComputedStyle(document.documentElement);
+    detailPaneHeight = parseInt(rootStyle.getPropertyValue('--detail-pane-height'));
+    rem = parseInt(rootStyle.fontSize);
+    mobileViewBreakpoint = parseInt(rootStyle.getPropertyValue('--mobile-view-breakpoint'));
+  }
 
   function addThumbnailImageClick() {
     thumbnails?.forEach(thumbnail => {
@@ -167,6 +173,7 @@ const { collection, compare } = Astro.props;
 
   function showDetail(detail: Div) {
     if(detail != null) {
+      readCssVariables();
 
       let thumbnail: Div = grid?.querySelector(`.thumbnail[data-index="${detail.dataset.index}"]`);
       markThumbnailActive(thumbnail);
