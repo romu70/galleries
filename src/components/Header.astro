@@ -25,6 +25,18 @@ import Hamburger from '../components/Hamburger.astro';
     width: 16rem;
   }
 
+  /* On phones the detail pane is full screen: pin the header so the
+     hamburger stays visible and usable above it, wherever the page is scrolled */
+  @media screen and (max-width: 767px) {
+    :global(body.detail-open) #header {
+      position: fixed;
+    }
+
+    :global(body.detail-open) #header :global(#hamburger) {
+      background-color: var(--active-background-color);
+    }
+  }
+
   @media screen and (min-width: 768px) {
     #header {
       width:100%;

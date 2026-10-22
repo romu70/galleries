@@ -1,217 +1,293 @@
 ---
 import { Image, getImage } from 'astro:assets';
-import Date from '../components/Date.astro';
-import Location from '../components/Location.astro';
-import Tag from '../components/Tag.astro';
 // import { Debug } from 'astro:components';
 const { item, index } = Astro.props;
 let geoUrl = "https://www.openstreetmap.org/?" + item.data.geo;
 const theImage = await getImage({src: item.data.image.file});
+
+const artists: string[] = item.data.tag.split('+').map((a: string) => a.trim());
+const isUnknown = artists.length === 1 && artists[0].toLowerCase() === "unknown";
+
+const pubDate: Date = item.data.pubDate;
+const isoDate = pubDate.toISOString().slice(0, 10);
+const longDate = pubDate.toLocaleDateString('en-GB', {
+  day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC'
+});
+
+const alt = isUnknown
+  ? `Photo taken in ${item.data.place} on ${longDate}`
+  : `Work by ${artists.join(' and ')}, ${item.data.place}`;
 ---
 
-<div class="detail" data-index={index}>
+<div class="detail" data-index={index} role="dialog" aria-label="Photo viewer">
   <div class="detail-left">
     <a href={theImage.src} target="_blank" rel="noreferrer noopener">
-      <Image src={item.data.image.file} alt="" data-index={index} />
+      <Image src={item.data.image.file} alt={alt} data-index={index} />
     </a>
   </div>
-    <div class="detail-right">
-      <div class="buttons">
-        <div class="buttons-left">
-          <button class="previous-button" type="button" aria-label="Previous" data-index={index} disabled>
-            <svg class="arrow-svg" width="24px" height="24px">
-              <use xlink:href="#left" />
-            </svg>
-          </button>
-          <button class="next-button" type="button" aria-label="Next" data-index={index}>
-            <svg class="arrow-svg" width="24px" height="24px">
-              <use xlink:href="#right" />
-            </svg>
-          </button>
-        </div>
-        <button class="close-button" type="button" aria-label="Close" >
-          <svg class="close-svg" width="16px" height="16px">
-            <use xlink:href="#close" />
-          </svg>
-        </button>
-      </div>
-      <div class="info">
-        <div class="info-top">
-          <Tag tag={item.data.tag} />
-        </div>
-        <div class="info-bottom">
-          <Date date={item.data.pubDate} />
-          <Location geo={item.data.geo} place={item.data.place} />
-        </div>
-      </div>
-      <button class="location-button"><a href={geoUrl} target="_blank">See location</a></button>
+  <div class="detail-right">
+    <div class="controls">
+      <button class="previous-button" type="button" aria-label="Previous photo" data-index={index} disabled>
+        <svg class="arrow-svg" width="24px" height="24px" aria-hidden="true">
+          <use xlink:href="#left" />
+        </svg>
+      </button>
+      <button class="next-button" type="button" aria-label="Next photo" data-index={index}>
+        <svg class="arrow-svg" width="24px" height="24px" aria-hidden="true">
+          <use xlink:href="#right" />
+        </svg>
+      </button>
+      <button class="close-button" type="button" aria-label="Close">
+        <svg class="close-svg" width="16px" height="16px" aria-hidden="true">
+          <use xlink:href="#close" />
+        </svg>
+      </button>
+    </div>
+
+    <hr class="divider" />
+
+    <div class="meta">
+      <h2 class="title">{item.data.place}</h2>
+      <dl class="fields">
+        <dt>Artist</dt>
+        {isUnknown ? (
+          <dd class="unknown">Unknown</dd>
+        ) : (
+          <dd class="artists">
+            {artists.map((artist: string) => (
+              // Keeps the .tag class and data-tag so a click filters by artist
+              <button type="button" class="tag artist" data-tag={artist}>{artist}</button>
+            ))}
+          </dd>
+        )}
+        <dt>Date</dt>
+        <dd><time datetime={isoDate}>{longDate}</time></dd>
+      </dl>
+      <a class="map-link" href={geoUrl} target="_blank" rel="noreferrer noopener">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+        See on the map
+      </a>
+    </div>
   </div>
 </div>
 
 <style>
+  /* Phone: full screen, scrollable; photo, then metadata, divider, controls */
   .detail {
     display: flex;
-  	flex-direction: column;
+    flex-direction: column;
     /* Extra top padding to clear the hamburger menu */
-    padding: 3.5rem 2rem 2rem;
-    gap: 1rem;
+    padding: 3.5rem 1rem 1.5rem;
+    gap: 1.5rem;
     background-color: var(--active-background-color);
+    color: var(--main-color);
     position: fixed;
-    left: 0px;
     inset: 0;
+    overflow-y: auto;
     transition: background-color var(--transDur);
     z-index: 10;
   }
 
-  .detail-left {
-    flex-basis: 60%;
-    max-width: 100%;
-    height: 100%;
-    display: flex;
-  }
-
   .detail-left a {
-    display:flex;
-    align-self: center;
-    margin: auto;
-    height: 100%;
+    display: block;
   }
 
-  .detail-left a img {
-    margin-top: auto;
-    margin-bottom: auto;
+  .detail-left img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 60vh;
+    object-fit: contain;
   }
 
   .detail-right {
     display: flex;
     flex-direction: column;
-    flex: 1 1 30%;
-    height: 100%;
-    justify-content: flex-start;
     gap: 1.5rem;
   }
 
-  .info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-  }
+  .meta    { order: 1; }
+  .divider { order: 2; }
+  .controls { order: 3; }
 
-  .info-top {
+  .controls {
     display: flex;
-    justify-content: flex-start;
-    align-items: flex-start;
+    align-items: center;
     gap: 0.5rem;
-  }
-
-  .info-bottom {
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
-  }
-
-  .buttons {
-    display:flex;
-    flex-direction: row;
-  }
-
-  .buttons-left {
-    display:flex;
-    flex-direction: row;
-    align-self: flex-start;
-    gap: 1rem;
-    flex-basis: 90%;
   }
 
   .close-button {
-    align-self: flex-end;
+    margin-left: auto;
   }
 
-  button {
+  .divider {
+    border: 0;
+    height: 1px;
+    margin: 0;
+    background-color: var(--main-color);
+    opacity: 0.2;
+  }
+
+  .meta {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .title {
+    margin: 0;
+    font-size: 1.5rem;
+    line-height: 1.2;
+    font-weight: 500;
+  }
+
+  .fields {
+    margin: 0;
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr);
+    gap: 0.75rem 1rem;
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .fields dt {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.65;
+    padding-top: 0.1rem;
+  }
+
+  .fields dd {
+    margin: 0;
+  }
+
+  .unknown {
+    font-style: italic;
+    opacity: 0.75;
+  }
+
+  .artists {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.5rem;
+  }
+
+  .artist {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    color: var(--main-color);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.2em;
+    transition: text-decoration-color 0.2s;
+  }
+
+  .artist:hover,
+  .artist:focus-visible {
+    text-decoration-color: currentColor;
+  }
+
+  .controls button {
     background: transparent;
     color: var(--main-color);
-    align-self: flex-end;
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
     border: 1px solid var(--main-color);
     border-radius: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
   }
 
-  .location-button {
-    align-self: flex-start;
-    width: auto;
-    padding: 0 1rem;
-    border-radius: 0.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-  }
-
-  .location-button a {
-    align-self: center;
-    color: var(--main-color);
-    text-decoration: none;
-  }
-
-  .location-button:hover,
-  .location-button:hover a,
-  .location-button a:hover {
-    color: var(--active-background-color);
-    outline: transparent;
-    background-color: var(--main-color);
-  }
-
-    button:disabled {
+  .controls button:disabled {
     opacity: 0.5;
+    cursor: default;
   }
 
-  button:focus,
-  button:hover {
+  .controls button:not(:disabled):hover {
     color: var(--active-background-color);
-    outline: transparent;
     background-color: var(--main-color);
   }
 
+  .map-link {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    height: 2.75rem;
+    padding: 0 1.1rem;
+    border-radius: 1.375rem;
+    background-color: var(--main-color);
+    color: var(--active-background-color);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+
+  .map-link:hover {
+    opacity: 0.85;
+  }
+
+  .controls button:focus-visible,
+  .map-link:focus-visible,
+  .artist:focus-visible,
+  .detail-left a:focus-visible {
+    outline: 2px solid var(--main-color);
+    outline-offset: 2px;
+  }
+
+  /* Desktop: inline pane under the thumbnail row, photo left, panel right.
+     The panel is one compact group at the top, never stretched over the
+     pane height. */
   @media (min-width: 768px) {
     .detail {
       flex-direction: row;
-      padding: 1.5rem;
+      align-items: stretch;
+      padding: 1.5rem 2rem;
+      gap: 3rem;
       position: absolute;
-      left: 0px;
-      gap: 2rem;
+      left: 0;
+      right: 0;
       height: var(--detail-pane-height);
-      align-items: center;
+      overflow: visible;
     }
 
     .detail-left {
-      flex-basis: 60%;
-      max-width: 76%;
-      height: 100%;
-      display: flex;
+      flex: 1 1 auto;
+      min-width: 0;
     }
 
     .detail-left a {
-      align-self: center;
-      margin: auto;
+      height: 100%;
+    }
+
+    .detail-left img {
+      width: 100%;
+      height: 100%;
+      max-height: none;
     }
 
     .detail-right {
-      justify-content: space-between;
-      gap: 1rem;
+      flex: 0 0 20rem;
+      align-self: flex-start;
+      gap: 1.25rem;
     }
 
-    .buttons {
-      display:flex;
-      flex-direction: row;
-      gap: 1rem;
+    .meta,
+    .divider,
+    .controls {
+      order: 0;
     }
-  }
 
-  @media (min-width: 1024px) {
-    .detail-left {
-      flex-basis: 65%;
+    .meta {
+      gap: 1.25rem;
     }
   }
 </style>

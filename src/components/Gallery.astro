@@ -49,6 +49,7 @@ const { collection, compare } = Astro.props;
     addDetailClick('.next-button', onDetailNextClick);
     addDetailClick('.previous-button', onDetailPreviousClick);
     document.getElementById('filter-clear')?.addEventListener('click', clearFilter);
+    window.addEventListener('resize', onWindowResize);
   });
 
   // Read the CSS variables when needed, not at DOMContentLoaded: Safari can fire
@@ -166,6 +167,7 @@ const { collection, compare } = Astro.props;
     if(detail != null) {
       detail.style.visibility = "collapse";
       currentShownDetail = null;
+      document.body.classList.remove("detail-open");
       let thumbnail: Div = grid?.querySelector(`.thumbnail[data-index="${detail.dataset.index}"]`);
       markThumbnailInactive(thumbnail);
     }
@@ -178,62 +180,56 @@ const { collection, compare } = Astro.props;
       let thumbnail: Div = grid?.querySelector(`.thumbnail[data-index="${detail.dataset.index}"]`);
       markThumbnailActive(thumbnail);
 
-      // Respect the media query. If width < 768, the detail is full screen,
-      // if not, it's below the thumbnail
-      if(window.innerWidth < mobileViewBreakpoint) {
-        // Mobile view
-        detail.style.top = "0";
-        detail.style.height = "100vh";
-      } else {
-        // Wide view
-
-        // Place the detail pane just below the thumbnail's line
-        // let thumbnail: Div = grid?.querySelector(`.thumbnail[data-index="${detail.dataset.index}"]`);
-        if(thumbnail) {
-          let top = thumbnail.getBoundingClientRect()["bottom"] + window.scrollY;
-
-          detail.style.top = top?.toString() + "px"
-          // Set the selected item height to "insert" the detail pane into the grid layout
-          let height = thumbnail?.offsetHeight / rem + detailPaneHeight;
-          if(thumbnail && thumbnail.parentElement) {
-            thumbnail.parentElement.style.height = height + "rem";
-          }
-
-          // The idea of the timeout is taken from this:
-          // https://stackoverflow.com/questions/71181018/scrollintoview-doesnt-scroll-anywhere
-          setTimeout(function () {
-                detail?.scrollIntoView({
-                behavior: "smooth",
-                block: "center",
-            });
-          }, 100);
-        }
-      }
+      layoutDetail(detail, thumbnail, true);
 
       detail.style.visibility = "visible";
       currentShownDetail = detail;
 
-      // If the image placeholder ratio is > image ratio, so it's width first,
-      // else it's height first
-      let placeholder: Div = detail.firstElementChild as HTMLElement;
-      let divRatio: number = Number(placeholder?.offsetWidth) / Number(placeholder?.offsetHeight);
-      let detailImg: Div = grid?.querySelector(`.detail-left img[data-index="${detail.dataset.index}"]`);
-      let imgRatio: number = Number(detailImg?.getAttribute("width")) / Number(detailImg?.getAttribute("height"));
-      // console.log("divRatio: " + divRatio);
-      // console.log("imgRatio: " + imgRatio);
+      // Lets the header stay on top of the full-screen pane on phones
+      document.body.classList.add("detail-open");
+    }
+  }
 
-      if(detailImg) {
-        if (divRatio < imgRatio) {
-          // console.log("less");
-          detailImg.style.width = "100%";
-          detailImg.style.height = "auto";
-        } else {
-          // console.log("more");
-          detailImg.style.width = "auto";
-          detailImg.style.height = "100%";
-        }
+  // Respect the media query. If width < 768, the detail is full screen,
+  // if not, it's below the thumbnail's row and fills the rest of the window
+  function layoutDetail(detail: HTMLElement, thumbnail: Div, scroll: boolean) {
+    if(window.innerWidth < mobileViewBreakpoint) {
+      // Mobile view: the CSS makes the pane full screen (fixed, inset 0).
+      // Drop any inline position left by a previous wide-view opening.
+      detail.style.top = "";
+      detail.style.height = "";
+      if(thumbnail?.parentElement) {
+        thumbnail.parentElement.style.height = currentThumbnailHeight + "px";
+      }
+    } else if(thumbnail) {
+      // Wide view: the thumbnail's row goes to the top of the window and the
+      // pane takes the remaining height, never less than --detail-pane-height
+      const rowTop = thumbnail.getBoundingClientRect().top + window.scrollY;
+      const paneHeight = Math.max(window.innerHeight - currentThumbnailHeight, detailPaneHeight * rem);
+
+      // Place the detail pane just below the thumbnail's line
+      detail.style.top = (rowTop + currentThumbnailHeight) + "px";
+      detail.style.height = paneHeight + "px";
+      // Set the selected item height to "insert" the detail pane into the grid layout
+      if(thumbnail.parentElement) {
+        thumbnail.parentElement.style.height = (currentThumbnailHeight + paneHeight) + "px";
+      }
+
+      if(scroll) {
+        // The idea of the timeout is taken from this:
+        // https://stackoverflow.com/questions/71181018/scrollintoview-doesnt-scroll-anywhere
+        setTimeout(function () {
+          window.scrollTo({ top: rowTop, behavior: "smooth" });
+        }, 100);
       }
     }
+  }
+
+  function onWindowResize() {
+    if(!currentShownDetail) return;
+    readCssVariables();
+    let thumbnail: Div = grid?.querySelector(`.thumbnail[data-index="${currentShownDetail.dataset.index}"]`);
+    layoutDetail(currentShownDetail, thumbnail, false);
   }
 
   function onThumbnailImageClick(this: HTMLElement, e: Event) {
@@ -280,7 +276,7 @@ const { collection, compare } = Astro.props;
   }
 
   function onDetailCloseClick(this: HTMLElement, e: Event) {
-    hideDetail(this.parentNode?.parentNode?.parentNode as Div);
+    hideDetail(this.closest('.detail') as Div);
   }
 
   function onDetailNextClick(this: HTMLElement, e: Event) {
