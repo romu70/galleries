@@ -173,7 +173,12 @@ After all groups:
    )"
    ```
    The commit message should summarise what was added, e.g. `Add 4 streetarts entries (2025-06-26 / 2025-06-28)` or `Add 3 fonts + 2 streetarts entries (2025-07-01)`. If you repaired an EXIF fallback, say so in the body. Never use `git add .` or `git add -A`; run `git status --short` before staging and confirm nothing else rides along.
-10. **Push and open the PR** against `main`: push the branch, then open a PR (session PR tool or `gh pr create`). Title as the commit subject. Body: the review table as approved, any flagged entries, and any EXIF repair. The user reviews and merges it from the GitHub app; merging deploys the site.
+10. **Push and open the PR** against `main`: `git push -u origin <branch>`, then open the PR through the REST API — `gh pr create` uses GraphQL, which cloud sessions block:
+    ```bash
+    gh api repos/romu70/galleries/pulls -f base=main -f head=<branch> \
+      -f title="<commit subject>" -F body=@/tmp/gallery-ingest/pr-body.md --jq .html_url
+    ```
+    Title as the commit subject. Body: the review table as approved, any flagged entries, and any EXIF repair. The user reviews and merges it from the GitHub app; merging deploys the site.
 
 ### Step 7 — Confirm before cleanup
 Cleanup is only allowed once the PR exists and its branch is pushed. Check `git -C "$SITE" ls-remote origin ingest/...` returns the commit you pushed. If the push or PR failed, **skip Step 8**: the originals in the inbox repo are then the only copy outside the iPhone.
