@@ -51,7 +51,7 @@ import { execFileSync } from "child_process";
 
 // --- CONFIGURATION ---
 const MAX_DIMENSION = 1600;
-const JPEG_QUALITY = 92;
+const JPEG_QUALITY = 85;
 const CONTENT_DIR = "src/content";
 const IMG_SOURCE_DIR = "inbox";
 const PROCESSED_DIR = path.join(IMG_SOURCE_DIR, "processed");
