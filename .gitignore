@@ -22,3 +22,19 @@ pnpm-debug.log*
 
 # Temporary inbox for image processing
 inbox/
+
+# Images only in the gallery folders (guard against committing originals)
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.heic
+*.heif
+*.dng
+!src/content/fonts/images/*.jpg
+!src/content/fonts/images/*.jpeg
+!src/content/fonts/images/*.png
+!src/content/streetarts/images/*.jpg
+!src/content/streetarts/images/*.jpeg
+!src/content/streetarts/images/*.png
+!src/images/**
