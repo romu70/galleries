@@ -5,5 +5,6 @@
   },
   "geo": "mlat=47.18212833333333&mlon=-1.525295#map=19/47.18212833333333/-1.525295",
   "place": "Nantes, France",
-  "tag": "Stend"
+  "tag": "Stend",
+  "wall": "nantes-w003"
 }
