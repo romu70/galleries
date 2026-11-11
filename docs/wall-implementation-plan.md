@@ -1,8 +1,14 @@
 # Implementation plan — "This wall over time"
 
-Single reference for implementing the feature. It consolidates `wall-history-plan.md` (overall plan), `wall-data-model-plan.md` (data model) and the V2 design (Design canvas "Galleries lightbox", row "Same wall over time — V2"). Where they disagree, this document wins.
+Single, self-contained reference for implementing the feature. Everything needed is in this file and in the mockups under `docs/wall-design/`:
 
-Revision 3 (2026-11-11): every reviewed photo gets a wall (S2); a photo without a wall is "to process"; 5 groups per run; review mode added to the skill.
+- `docs/wall-design/desktop.jpg` — detail view on desktop, photo 3 of 5 on the test wall.
+- `docs/wall-design/phone.png` — same, on phone.
+- `docs/wall-design/states.png` — states of the section: first photo, last photo, wall with 2 photos, wall with 12 photos, status line after a cleared filter. The dates in the 2- and 12-photo examples are illustrative.
+
+Background only, not in the repo and not needed: two earlier planning notes and the design canvas they came from (kept in Romu's claude.ai project). Where they differ, this document wins.
+
+Revision 4 (2026-11-11): made self-contained; mockups added. Revision 3: every reviewed photo gets a wall (S2); a photo without a wall is "to process"; 5 groups per run; review mode added to the skill.
 
 ## 1. Goal and scope
 
@@ -53,7 +59,7 @@ Done when: `astro build` passes; a dangling reference fails the build; the site 
 3. Client script: buttons and dots call the existing `processImage(index)`. If the target is hidden by the artist filter, clear the filter first, then show the status line in the newly opened photo.
 4. Crossfade between photos of the same wall (~200 ms), none under `prefers-reduced-motion: reduce`.
 
-Done when all states of §4 render as on the canvas, on desktop and phone, keyboard-only use works, and the gallery arrows behave as before.
+Done when all states of §4 render as in the mockups, on desktop and phone, keyboard-only use works, and the gallery arrows behave as before.
 
 ### PR 3 — New skill `gallery-walls`
 Runs by hand, any time, independently of `gallery-ingest`. Two modes.
@@ -84,7 +90,7 @@ Update the skill's schema facts: `wall` exists; ingest never writes it, so new p
 ### Then — Backfill
 Repeated `gallery-walls` runs, one PR per run, at your own pace. Expect ~300 wall files over time, most with a single photo.
 
-## 4. UI spec (from the canvas)
+## 4. UI spec (see the mockups in `docs/wall-design/`)
 
 Uses the existing tokens: `--main-color` (white), `--active-background-color` (#464646), Inter.
 
