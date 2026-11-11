@@ -3,6 +3,12 @@ import type { CollectionEntry } from "astro:content";
 type Streetart = CollectionEntry<"streetarts">;
 type Wall = CollectionEntry<"walls">;
 
+// Any gallery entry: fonts have no wall, street art may have one.
+interface GalleryEntry {
+  id: string;
+  data: { pubDate: Date; wall?: { id: string } | null };
+}
+
 // <town>-wNNN: lowercase ASCII town slug, then "-w" and at least 3 digits.
 export const WALL_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*-w\d{3,}$/;
 
@@ -28,13 +34,25 @@ function compareMembers(a: WallMember, b: WallMember): number {
   return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
 }
 
+const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** "7 Sep 2025" (UTC). Fixed month names: recent ICU writes "Sept" for en-GB. */
+export function formatShortDate(date: Date): string {
+  return `${date.getUTCDate()} ${MONTHS_SHORT[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
+}
+
+/** "7 September 2025" (UTC), as used elsewhere in the detail view. */
+export function formatLongDate(date: Date): string {
+  return date.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+}
+
 /**
- * Groups street-art entries by wall.
+ * Groups gallery entries by wall.
  * `entries` must be in gallery order: an entry's index in this array is the
  * `data-index` of its Detail. Returns one WallInfo per entry that has a wall,
  * keyed by entry id. Entries without a wall are absent from the map.
  */
-export function getWallMembers(entries: Streetart[]): Map<string, WallInfo> {
+export function getWallMembers(entries: GalleryEntry[]): Map<string, WallInfo> {
   const byWall = new Map<string, WallMember[]>();
   entries.forEach((entry, index) => {
     const wallId = entry.data.wall?.id;

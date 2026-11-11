@@ -1,8 +1,13 @@
 ---
 import Item from '../components/Item.astro';
 import Symbols from "../components/Symbols.astro";
+import { getWallMembers } from "../lib/walls";
 
 const { collection, compare } = Astro.props;
+// Sort once: the index of each item is the data-index used by the script,
+// and the wall members must point at the same indexes.
+const sorted = collection.sort(compare);
+const wallInfo = getWallMembers(sorted);
 ---
 
 <Symbols />
@@ -14,9 +19,9 @@ const { collection, compare } = Astro.props;
 
 <div class="items-grid" id="items-grid">
   {
-    collection.sort(compare).map((item: any, index: number) => (
+    sorted.map((item: any, index: number) => (
       // <Debug {item}/>
-      <Item item={item} index={index}/>
+      <Item item={item} index={index} wall={wallInfo.get(item.id)}/>
     ))
   }
 </div>
@@ -45,6 +50,7 @@ const { collection, compare } = Astro.props;
     addThumbnailImageClick();
     addKeyboardManagement();
     addTagClick();
+    addWallClick();
     addDetailClick('.close-button', onDetailCloseClick);
     addDetailClick('.next-button', onDetailNextClick);
     addDetailClick('.previous-button', onDetailPreviousClick);
@@ -120,6 +126,52 @@ const { collection, compare } = Astro.props;
     });
   }
 
+  // "This wall over time": date buttons and dots jump to another photo of the
+  // same wall. If the artist filter hides it, the filter is cleared first and
+  // the newly opened photo says so in its status line.
+  function addWallClick() {
+    grid?.addEventListener('click', (e) => {
+      const button = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-wall-target]');
+      if (!button || button.disabled) return;
+      const target = Number(button.dataset.wallTarget);
+      const targetItem = grid?.querySelector<HTMLElement>(`.item[data-index="${target}"]`);
+      if (!targetItem) return;
+
+      const clearedFilter = currentFilter !== null && targetItem.style.display === 'none'
+        ? currentFilter
+        : null;
+      if (clearedFilter !== null) clearFilter();
+
+      const direction = button.classList.contains('wall-next') ? 'next' : 'prev';
+      processImage(target);
+
+      const detail = currentShownDetail;
+      if (!detail) return;
+
+      // Crossfade the new photo in (CSS turns it off under reduced motion)
+      detail.classList.remove('wall-fade');
+      void detail.offsetWidth;
+      detail.classList.add('wall-fade');
+
+      if (clearedFilter !== null) {
+        const status = detail.querySelector<HTMLElement>('.wall-status');
+        if (status) status.textContent = `Artist filter \u201C${clearedFilter}\u201D cleared to show this photo.`;
+      }
+
+      // The clicked button is now hidden: keep keyboard focus in the section
+      const prev = detail.querySelector<HTMLButtonElement>('.wall-prev');
+      const next = detail.querySelector<HTMLButtonElement>('.wall-next');
+      const preferred = direction === 'next' ? [next, prev] : [prev, next];
+      preferred.find(b => b && !b.disabled)?.focus({ preventScroll: true });
+    });
+  }
+
+  function clearWallState(detail: HTMLElement) {
+    detail.classList.remove('wall-fade');
+    const status = detail.querySelector<HTMLElement>('.wall-status');
+    if (status) status.textContent = '';
+  }
+
   function addKeyboardManagement() {
     document.addEventListener("keyup", (event) => {
       if (event.defaultPrevented) return;
@@ -166,6 +218,7 @@ const { collection, compare } = Astro.props;
   function hideDetail(detail: Div) {
     if(detail != null) {
       detail.style.visibility = "collapse";
+      clearWallState(detail);
       currentShownDetail = null;
       document.body.classList.remove("detail-open");
       let thumbnail: Div = grid?.querySelector(`.thumbnail[data-index="${detail.dataset.index}"]`);

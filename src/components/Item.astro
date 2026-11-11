@@ -3,11 +3,11 @@ import Thumbnail from '../components/Thumbnail.astro';
 import Detail from '../components/Detail.astro';
 // import { Debug } from 'astro:components';
 
-const { item, index } = Astro.props;
+const { item, index, wall } = Astro.props;
 ---
 <div class="item" data-index={index} >
   <Thumbnail item={item} index={index} />
-  <Detail item={item} index={index} />
+  <Detail item={item} index={index} wall={wall} />
 </div>
 
 <script>
