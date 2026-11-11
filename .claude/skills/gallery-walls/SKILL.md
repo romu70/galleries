@@ -56,14 +56,15 @@ Photos without GPS are listed apart (`without_gps`) and handled **only if the us
 For each seed:
 1. Make a comparison sheet of the seed and all its candidates, in date order: `node scripts/walls.mjs sheet --out /tmp/gallery-walls/cmp-<seed>.jpg --from <seed> <ids in date order>`. With more than 9 candidates, make several sheets (the seed on each).
 2. Read the sheet and compare **what does not change when a wall is repainted**: roofline and gable shape, windows, doors, vents, pipes, gutters, downpipes, wall ends and corners, ground, kerb, neighbouring buildings. The painting itself is weak evidence: many of these walls are legal walls repainted every few months, so the same wall can show completely different works, and the same artist can paint different walls.
-3. If a candidate already has a wall, look at that wall's other photos too (`review <wall-id>`) before proposing to join it.
-4. Propose exactly one of:
+3. Check the **form factor** of each painting, alongside GPS: its orientation (portrait or landscape) and rough proportions (square, wide band, narrow panel). A wall's shape does not change when it is repainted, so as a general rule a vertical painting is not on the same wall as a horizontal one, and a long low band is not on the same wall as a tall narrow panel. Treat a form-factor mismatch as strong evidence of different walls: rule the candidate out unless the fixed features clearly match. Exceptions to look for: a close-up or crop of part of a wall, a photo taken at an angle, or a painting that covers only part of the wall. In that case, say why in the proposal (`⚠ 3 is portrait: close-up of the left end, same downpipe`).
+4. If a candidate already has a wall, look at that wall's other photos too (`review <wall-id>`) before proposing to join it.
+5. Propose exactly one of:
    - **join existing wall `<id>`** — a candidate already on a wall matches;
    - **new wall with these photos** — several unprocessed photos match each other;
    - **new wall with this photo alone** — no match.
 
    An unprocessed candidate that matches is processed at the same time, in the same group. A candidate that does not match is left out (it will be a seed later, possibly in this run).
-5. When unsure, say so in the proposal (`⚠ same roofline, but the window is missing on 3`) rather than guessing. Do not join a photo to a wall on GPS alone.
+6. When unsure, say so in the proposal (`⚠ same roofline, but the window is missing on 3`) rather than guessing. Do not join a photo to a wall on GPS alone, and do not join a portrait photo to a landscape wall (or the reverse) without a stated reason.
 
 ### Step 3 — Review on iPhone
 The user is usually on the iPhone. For each proposed group, make **one contact sheet** (`sheet --out /tmp/gallery-walls/group-<n>.jpg <ids in date order>`, including the existing members when joining a wall) and send it to the user (e.g. with the file-sending tool, rendered inline). Then one compact line per group:
@@ -150,6 +151,7 @@ Short:
 - **Dense spots** (legal walls, a street with many murals): a seed can have 10+ candidates within 20 m that are different walls. Compare structure, not paint; propose small, confident groups and leave the doubtful candidates for later seeds.
 - **Same wall, shot from far away** or from across the street: the GPS points can be more than 20 m apart. If the user says a photo belongs to a wall the batch did not offer, use `merge with` / `move … to` as asked; if you suspect it, run `batch --radius 40` for that seed.
 - **Identical coordinates** for different works (photos taken in a row without a GPS update): distance 0 m is not evidence of the same wall.
+- **Form factor vs GPS**: same GPS point but one painting is vertical and the other horizontal → different walls, as a general rule. Same form factor is only weak evidence: it never makes up for different fixed features.
 - **A wall with 2 faces in one photo** (corner): the photo goes on the wall that is its main subject; mention it in the report.
 - **A wall across two towns** (`place` differs, e.g. Nantes vs Rezé on a boundary street): the new wall takes the town of its oldest photo; joining an existing wall keeps that wall's id whatever the photo's town.
 - **An entry with `place: "City, Country"`** (EXIF fallback from ingest): `apply` refuses to create a wall from it. Leave it to process and flag it.
