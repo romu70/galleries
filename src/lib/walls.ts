@@ -34,11 +34,9 @@ function compareMembers(a: WallMember, b: WallMember): number {
   return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
 }
 
-const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-/** "7 Sep 2025" (UTC). Fixed month names: recent ICU writes "Sept" for en-GB. */
+/** "26 Nov 2023" (UTC). Node's ICU may write "Sept" for September; accepted. */
 export function formatShortDate(date: Date): string {
-  return `${date.getUTCDate()} ${MONTHS_SHORT[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
+  return date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 }
 
 /** "7 September 2025" (UTC), as used elsewhere in the detail view. */
