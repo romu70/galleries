@@ -1,19 +1,19 @@
 ---
 name: gallery-walls
-description: Group street-art photos of the Galleries site by physical wall, so the detail view can show "This wall over time". Two modes. "process" (default) takes the oldest photos without a wall, proposes 5 groups from GPS proximity and visual comparison, asks the user to review contact sheets, then writes the walls and opens a PR. "review <photo-id | wall-id>" corrects an existing wall (move, split, merge). Trigger when the user says things like "process walls", "run gallery-walls", "group the walls", "next walls batch", "review wall nantes-w004", "this photo is on the wrong wall".
+description: Group street-art photos of the Galleries site by physical wall, so the detail view can show "This wall over time". Three modes. "wall" (main) takes image links or photo ids the user knows show the same wall (repainted over time), checks them, writes the wall and opens a PR. "review <photo-id | wall-id>" corrects an existing wall (move, split, merge). "process" is an optional sweep that proposes 5 groups from GPS proximity and visual comparison. Trigger when the user sends image links or photo ids of one wall ("these are the same wall", "same wall: …"), or says "process walls", "run gallery-walls", "next walls batch", "review wall nantes-w004", "this photo is on the wrong wall".
 ---
 
 # Gallery Walls
 
-Assigns each street-art photo of `romu70/galleries` to the physical wall it shows. Runs by hand, in a Claude Code cloud session or locally, independently of `gallery-ingest`. GPS only produces candidates; the user decides what is the same wall. The result is a PR the user merges from the GitHub app.
+Assigns each street-art photo of `romu70/galleries` to the physical wall it shows. Runs by hand, in a Claude Code cloud session or locally, independently of `gallery-ingest`. The user decides what is the same wall: usually by sending the photos of a wall they know was repainted (mode `wall`); GPS and visual checks only flag doubts or produce proposals. The result is a PR the user merges from the GitHub app.
 
 ## Project facts (load before doing anything)
 
 - **Wall** = one physical painted surface. A pillar with 4 painted faces is 4 walls. Several photos of the same artwork are each a step on that wall.
 - **Data** (see `docs/wall-implementation-plan.md` for the full design):
-  - Street-art entries: `src/content/streetarts/<id>.json`. The `wall` field holds a wall id. **Missing or `null` = to process; set = processed.** There is no other flag.
+  - Street-art entries: `src/content/streetarts/<id>.json`. The `wall` field holds a wall id. **Missing or `null` = no wall** (nothing shown on the site); set = on that wall. There is no other flag. The script and its output still say "to process" / "processed" for these two states.
   - Walls: `src/content/walls/<wall-id>.json` with `place`, optional `lat`/`lon`, optional `label`. Wall id = `<town>-wNNN` (lowercase ASCII town slug, at least 3 digits), opaque, e.g. `nantes-w001`.
-  - **Every reviewed photo gets a wall**, even when it is the only photo of that wall. A single-photo wall is the normal case: no warning, and the site shows no section for it.
+  - **Not every photo needs a wall.** The site shows "This wall over time" only for walls with 2+ photos, so a photo left at `null` looks exactly like a single-photo wall. Walls are created for the photos the user names (mode `wall`) or approves (mode `process`); everything else stays `null`. Single-photo walls are allowed (no warning) but are only created in `process` mode or when the user asks.
   - GPS lives only in the entry's `geo` string (`mlat=<lat>&mlon=<lon>#map=…`). A few entries have `geo: "#"` (no GPS).
 - **Helper script**: `scripts/walls.mjs`, run from the site repo root. It does all reading, distances, contact sheets and writing; do not hand-edit entry or wall files.
   - `node scripts/walls.mjs status` — counts: processed, to process, without GPS, walls.
@@ -33,17 +33,56 @@ Assigns each street-art photo of `romu70/galleries` to the physical wall it show
   Each photo appears at most once. A photo not in the plan is left as it is.
 - **Build checks**: `astro build` fails on a `wall` pointing to a missing file or a malformed id, and warns on a wall file no photo uses (`src/lib/walls.ts`, `checkWalls`).
 
-## Mode `process` (default)
-
-Works on street-art photos whose `wall` is missing or `null`: the backfill and new photos alike. A new photo of an already processed wall needs nothing special: it has no wall, so it is picked up and proposed as "join `<id>`".
-
-### Step 0 — Preconditions
+## Common preconditions (every mode that writes)
 - Locate the site repo (`git remote get-url origin` ends in `/galleries`). Call it `$SITE`; run everything from there.
 - `git -C "$SITE" pull --ff-only`; working tree clean (`git status --short`), else stop and show what is there.
 - `convert` and `montage` (ImageMagick) on PATH; if missing, `apt-get install -y imagemagick` and say so in the report.
 - If `node_modules` is missing, `npm ci` (needed for `astro build`).
-- `mkdir -p /tmp/gallery-walls` for the batch, sheets and plan.
-- `node scripts/walls.mjs status` — tell the user in one line where the backfill stands (e.g. "5 / 338 processed").
+- `mkdir -p /tmp/gallery-walls` for sheets and plans.
+- Branch: `walls/<…>` as named in each mode, unless the session imposes a branch name; then use that one (restarted from `main` if its last PR was merged).
+- Contact sheets meant for the user must be copied to a folder the user's app can open (the session's scratchpad or working directory) before sending.
+
+## Mode `wall <links or ids>` (main)
+
+The user sends photos they know show the same physical wall, usually a legal wall repainted several times. One wall per line; several lines = several walls, all in one PR.
+
+### W1 — Read the input
+- Accept site image links, detail page links or bare ids. Extract the id with the pattern `\d{4}-\d{2}-\d{2}-\d{2}` (the site's generated image URLs keep the original file name). If an item yields no id, or two ids, ask about that item only.
+- Each id must exist as `src/content/streetarts/<id>.json`. A fonts photo, or an unknown id, is reported and left out.
+- An id given on two lines is a conflict: ask.
+
+### W2 — Check (do not overrule the user)
+For each wall:
+1. `node scripts/walls.mjs sheet --out /tmp/gallery-walls/wall-<n>.jpg <ids in date order>` and read it. Distances on the sheet are from the oldest photo.
+2. Flag, do not fix: photos more than ~50 m apart, a form-factor mismatch (portrait vs landscape, band vs panel; see `process` Step 2.3), fixed features that clearly differ, a photo without GPS, a `place` in another town.
+3. Look at the photos' current walls:
+   - none on a wall → **new wall**;
+   - some on one existing wall → the others **join** it (show that wall's other members on the sheet too: `review <wall-id>`);
+   - photos spread over two or more existing walls → **ask** before merging them (`merge into <wall-id>?`).
+4. Optional hint: if `review <oldest-id> --radius 20` shows unprocessed photos near the wall that look like the same surface, mention them as "possibly the same wall" without adding them.
+
+### W3 — Confirm or go
+- **No flag and no merge**: write directly, the user's list is the decision. Send the sheet with the PR link at the end.
+- **Any flag, merge or hint**: send the sheet(s) first, one compact line per wall, e.g.
+  ```
+  [1] new wall: 2023-01-12-03, 2023-02-24-01, 2024-05-02-01   ⚠ 3 is 70 m from 1
+  [2] join nantes-w002 ← 2023-01-28-01, 2024-03-09-02
+  ```
+  and ask `ok`, `drop k`, `split k` per wall (same meaning as in `process` Step 3). Write nothing before the answer.
+
+### W4 — Write and deliver
+1. Plan: one `assign` entry per wall (`"wall": "new"` or the existing id), only the user's photos.
+2. `apply --dry-run`, check, branch `walls/<YYYY-MM-DD>-<HHMM>`, `apply`.
+3. Step 5 of `process` (build, diff guard, commit, PR). Commit subject: `Walls: <N> photos on <W> walls (<K> new)`.
+4. Report: PR link, walls created / joined with their photos, flags and how they were resolved, hints left for later, `status` after the run.
+
+## Mode `process` (optional sweep)
+
+Run only when the user asks for it. Works on street-art photos whose `wall` is missing or `null`: the backfill and new photos alike. A new photo of an already processed wall needs nothing special: it has no wall, so it is picked up and proposed as "join `<id>`".
+
+### Step 0 — Preconditions
+- The common preconditions above.
+- `node scripts/walls.mjs status` — tell the user in one line how many photos are on a wall (e.g. "14 / 338 on a wall").
 
 ### Step 1 — Select
 `node scripts/walls.mjs batch --seeds 15 > /tmp/gallery-walls/batch.json`
@@ -83,7 +122,7 @@ Numbers inside a group are the numbers printed on its contact sheet. Ask:
 Meaning of each answer (numbers are positions on that group's sheet):
 - `ok` — write the group as proposed.
 - `split k` — photos `k` and after go to a new wall of their own; the photos before `k` keep the proposal.
-- `drop k` — photo `k` leaves the group and stays **to process** (no wall): it will come back in a later run.
+- `drop k` — photo `k` leaves the group and stays with no wall: it can come back in a later run.
 - `merge with <wall-id>` — the group's unprocessed photos join that existing wall instead.
 - `alone` — each unprocessed photo of the group gets its own single-photo wall. `alone k` does it for photo `k` only.
 
@@ -92,7 +131,7 @@ In process mode, photos already on a wall are shown for context only: `split`/`d
 **Do not write anything before the answer.** No branch, no plan applied.
 
 ### Step 4 — Write
-1. Build `/tmp/gallery-walls/plan.json` from the answers. Every photo the user reviewed (all photos of all groups except dropped ones) must be in the plan, so it gets a wall.
+1. Build `/tmp/gallery-walls/plan.json` from the answers: all photos of all approved groups except dropped ones.
 2. `node scripts/walls.mjs apply /tmp/gallery-walls/plan.json --dry-run` and check the summary matches the answers (walls created, photos joined, single-photo walls). If not, fix the plan.
 3. Create the branch: `git checkout -b walls/<YYYY-MM-DD>-<HHMM>`.
 4. `node scripts/walls.mjs apply /tmp/gallery-walls/plan.json` and keep its JSON summary for the report.
@@ -123,7 +162,7 @@ Short:
 
 ## Mode `review <photo-id | wall-id>` — corrections
 
-1. `node scripts/walls.mjs review <id>`: members of the wall, walls within ~20 m, unprocessed photos nearby. If the photo has no wall, say so and offer `process` instead.
+1. `node scripts/walls.mjs review <id>`: members of the wall, walls within ~20 m, unprocessed photos nearby. If the photo has no wall, say so and offer mode `wall` instead.
 2. Make one contact sheet of the wall's members (date order) and one per nearby wall (or a single sheet if they are few), send them, and list them:
    ```
    nantes-w004 (3 photos): 1 2023-…, 2 2024-…, 3 2025-…
@@ -139,10 +178,11 @@ Short:
 
 ## Constraints and guardrails
 
-- **The user decides membership.** GPS and visual similarity only produce proposals. Never write before the answer.
+- **The user decides membership.** GPS and visual similarity only produce proposals or flags. In `process` and `review`, and in `wall` when something is flagged, never write before the answer.
 - **Change nothing but walls.** Only `wall` fields and `src/content/walls/*.json`. Never touch `tag`, `place`, `geo`, dates, images or `add-items.mjs`. A wrong place or artist seen during review goes in the report, not in this PR.
 - **Never invent coordinates.** A wall's `lat`/`lon` come from a photo's GPS through `apply`; a wall made only of no-GPS photos has none.
 - **Do not renumber or rename existing walls.** Ids are opaque and stable; a deleted id may be reused later by `apply`, which is fine.
+- **The user's list wins.** In mode `wall`, never add a photo the user did not name, and never leave out one they named without saying why.
 - **One run, one PR.** Do not stack a second batch on an unmerged walls branch; if one is open, tell the user and ask whether to continue from it.
 - **Look before you propose.** Read every comparison sheet yourself; with many candidates, split the sheets rather than skimming one huge image.
 
@@ -154,5 +194,5 @@ Short:
 - **Form factor vs GPS**: same GPS point but one painting is vertical and the other horizontal → different walls, as a general rule. Same form factor is only weak evidence: it never makes up for different fixed features.
 - **A wall with 2 faces in one photo** (corner): the photo goes on the wall that is its main subject; mention it in the report.
 - **A wall across two towns** (`place` differs, e.g. Nantes vs Rezé on a boundary street): the new wall takes the town of its oldest photo; joining an existing wall keeps that wall's id whatever the photo's town.
-- **An entry with `place: "City, Country"`** (EXIF fallback from ingest): `apply` refuses to create a wall from it. Leave it to process and flag it.
+- **An entry with `place: "City, Country"`** (EXIF fallback from ingest): `apply` refuses to create a wall from it. Leave it without a wall and flag it.
 - **Inbox, ingest**: this skill never reads `galleries-inbox` and never runs `add-items`.
