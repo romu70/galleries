@@ -43,6 +43,7 @@ Out of scope: before/after slider, `/walls` page, map of walls, per-photo URLs, 
 ### PR 0 — Spike (no merge needed)
 - Point one entry at a non-existent wall with `reference()`, run `astro build`.
 - Record: does the build fail? This decides whether PR 1 needs its own existence check.
+- **Result (2026-11-11, Astro 7.4.7): the build does not fail.** `astro check` and `astro build` both pass; the content store keeps `{ id, collection }` without checking the wall exists. PR 1 therefore adds its own check (`checkWalls` in `src/lib/walls.ts`).
 
 ### PR 1 — Data model (no visible change)
 1. Split the shared schema in `src/content.config.ts`: base schema (fonts unchanged) + street-art extension with `wall: reference("walls").nullish()` (missing and `null` both accepted, both mean "to process").

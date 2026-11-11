@@ -2,7 +2,10 @@
 import Page from '../layouts/Page.astro';
 import Gallery from '../components/Gallery.astro'
 import { getCollection } from "astro:content";
+import { checkWalls } from "../lib/walls";
 const allSa = await getCollection('streetarts');
+// Fails the build on a dangling or malformed wall reference.
+checkWalls(allSa, await getCollection('walls'));
 // console.log(allSa);
 
 // // Get type
