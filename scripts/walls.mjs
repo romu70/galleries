@@ -6,7 +6,7 @@
 //   node scripts/walls.mjs status
 //   node scripts/walls.mjs batch [--seeds N] [--radius M]
 //   node scripts/walls.mjs review <photo-id | wall-id> [--radius M]
-//   node scripts/walls.mjs near <photo-id>... [--radius M]
+//   node scripts/walls.mjs near <photo-id>... [--radius M] [--tolerance T]
 //   node scripts/walls.mjs sheet --out <file.jpg> [--from <photo-id>] <photo-id>...
 //   node scripts/walls.mjs apply <plan.json> [--dry-run]
 //   node scripts/walls.mjs check
@@ -225,42 +225,45 @@ function aspectOf(p) {
   }
 }
 
-function shapeOf(ratio) {
-  if (ratio == null) return "unknown";
-  return ratio < 0.9 ? "portrait" : ratio > 1.1 ? "landscape" : "square";
-}
+// Candidates for one wall from the user's example photos. The main signal is
+// the photo's proportions: the user frames each wall edge to edge, so photos
+// of one wall keep almost the same width/height ratio over the years, while
+// phone GPS on one wall can be off by hundreds of metres. A candidate must be
+// within --radius metres (default 500) of an example AND have a ratio within
+// --tolerance (default 0.05 = 5 %) of an example's ratio. Photos within 20 m
+// whose ratio does not match are only counted (possible crops), not proposed.
+const NEAR_RADIUS = 500;
+const NEAR_TOLERANCE = 0.05;
 
-// Candidates for one wall from the user's example photos: street-art photos
-// within the radius of ANY example (default 20 m), whose form factor matches
-// the examples (portrait vs landscape; square and unknown always pass).
-// Candidates with the wrong form factor are listed apart, not proposed.
 function cmdNear(ids, opts) {
   if (!ids.length) fail("near needs at least one photo id");
-  const radius = Number(opts.radius ?? DEFAULT_RADIUS);
+  const radius = Number(opts.radius ?? NEAR_RADIUS);
+  const tolerance = Number(opts.tolerance ?? NEAR_TOLERANCE);
   const photos = loadPhotos();
   const examples = [...new Set(ids)].map((id) => photos.find((p) => p.id === id) ?? fail(`no street-art photo named ${id}`));
-  const located = examples.filter((p) => p.gps);
   const exIds = new Set(examples.map((p) => p.id));
-  const shapes = new Set(examples.map((p) => shapeOf(aspectOf(p))).filter((s) => s === "portrait" || s === "landscape"));
-  const fits = (shape) => shape === "square" || shape === "unknown" || shapes.size === 0 || shapes.has(shape);
+  const exRatio = new Map(examples.map((p) => [p.id, aspectOf(p)]));
+  const located = examples.filter((p) => p.gps);
+  const ratios = [...exRatio.values()].filter((r) => r != null);
+  const ratioGap = (r) => (r == null || !ratios.length ? Infinity : Math.min(...ratios.map((e) => Math.abs(Math.log(r / e)))));
   const candidates = [];
-  const excluded = [];
+  const closeOther = [];
   for (const p of photos) {
     if (exIds.has(p.id) || !p.gps || !located.length) continue;
     const d = Math.min(...located.map((e) => distance(e.gps, p.gps)));
     if (d > radius) continue;
     const ratio = aspectOf(p);
-    const item = { ...brief(p), distance_m: Math.round(d), shape: shapeOf(ratio), ratio: ratio && +ratio.toFixed(2) };
-    (fits(item.shape) ? candidates : excluded).push(item);
+    const item = { ...brief(p), distance_m: Math.round(d), ratio: ratio && +ratio.toFixed(2) };
+    if (ratioGap(ratio) <= Math.log(1 + tolerance)) candidates.push(item);
+    else if (d <= DEFAULT_RADIUS) closeOther.push(item.id);
   }
+  candidates.sort((a, b) => a.distance_m - b.distance_m);
   const walls = new Map();
   for (const p of [...examples, ...candidates]) if (p.wall) walls.set(p.wall, [...(walls.get(p.wall) ?? []), p.id]);
   print({
     radius_m: radius,
-    examples: examples.map((p) => {
-      const ratio = aspectOf(p);
-      return { ...brief(p), shape: shapeOf(ratio), ratio: ratio && +ratio.toFixed(2) };
-    }),
+    tolerance,
+    examples: examples.map((p) => ({ ...brief(p), ratio: exRatio.get(p.id) && +exRatio.get(p.id).toFixed(2) })),
     examples_without_gps: examples.filter((p) => !p.gps).map((p) => p.id),
     walls_involved: [...walls.entries()].map(([wall, members]) => ({
       wall,
@@ -268,7 +271,7 @@ function cmdNear(ids, opts) {
       members_all: photos.filter((p) => p.wall === wall).map((p) => p.id),
     })),
     candidates,
-    excluded_form_factor: excluded,
+    close_other_ratio: closeOther,
   });
 }
 
@@ -446,5 +449,5 @@ switch (command) {
   case "apply": cmdApply(rest[0], opts); break;
   case "check": cmdCheck(); break;
   default:
-    fail("usage: walls.mjs status | batch [--seeds N] [--radius M] | review <id> | near <id>... [--radius M] | sheet --out f.jpg [--from id] ids... | apply plan.json [--dry-run] | check");
+    fail("usage: walls.mjs status | batch [--seeds N] [--radius M] | review <id> | near <id>... [--radius M] [--tolerance T] | sheet --out f.jpg [--from id] ids... | apply plan.json [--dry-run] | check");
 }
