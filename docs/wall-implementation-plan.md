@@ -8,7 +8,7 @@ Single, self-contained reference for implementing the feature. Everything needed
 
 Background only, not in the repo and not needed: two earlier planning notes and the design canvas they came from (kept in Romu's claude.ai project). Where they differ, this document wins.
 
-Revision 4 (2026-11-11): made self-contained; mockups added. Revision 3: every reviewed photo gets a wall (S2); a photo without a wall is "to process"; 5 groups per run; review mode added to the skill.
+Revision 5 (2026-11-11): S2 relaxed — only photos the user names or approves get a wall; the skill's main mode takes the user's list of photos for one wall (`wall` mode), `process` becomes an optional sweep. Revision 4 (2026-11-11): made self-contained; mockups added. Revision 3: every reviewed photo gets a wall (S2); a photo without a wall is "to process"; 5 groups per run; review mode added to the skill.
 
 ## 1. Goal and scope
 
@@ -24,7 +24,7 @@ Out of scope: before/after slider, `/walls` page, map of walls, per-photo URLs, 
 | Wall | One physical painted surface. A pillar with 4 painted faces = 4 walls. |
 | Membership | Declared and confirmed by Romu. GPS only produces candidates. |
 | M1 | `walls` collection + `wall: reference("walls")` on street-art entries. |
-| S2 | **Every reviewed street-art photo gets a wall**, even when it is the only photo of that wall. The `wall` field is the processing state: missing or `null` = to process; set = processed. No other flag. |
+| S2 | *(Revised in rev. 5.)* **Only photos the user names (skill mode `wall`) or approves (mode `process`) get a wall**; the others stay `null`, which looks the same on the site as a single-photo wall. Missing or `null` = no wall; set = on that wall. No other flag. Single-photo walls stay allowed. |
 | D1 | Wall id `<town>-wNNN` (3 digits or more), opaque, e.g. `nantes-w001`. |
 | M2 | `lat`/`lon` optional on a wall. |
 | M3 | Several photos of the same artwork: each photo is one step. |
