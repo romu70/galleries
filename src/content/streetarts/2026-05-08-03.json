@@ -5,5 +5,6 @@
   },
   "geo": "mlat=47.1995861111111&mlon=-1.57300833333333#map=19/47.1995861111111/-1.57300833333333",
   "place": "Nantes, France",
-  "tag": "Tanala"
+  "tag": "Tanala",
+  "wall": "nantes-w001"
 }
