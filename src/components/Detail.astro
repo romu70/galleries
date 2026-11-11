@@ -1,7 +1,8 @@
 ---
 import { Image, getImage } from 'astro:assets';
+import { formatShortDate, formatLongDate, type WallInfo } from '../lib/walls';
 // import { Debug } from 'astro:components';
-const { item, index } = Astro.props;
+const { item, index, wall } = Astro.props as { item: any; index: number; wall?: WallInfo };
 let geoUrl = "https://www.openstreetmap.org/?" + item.data.geo;
 const theImage = await getImage({src: item.data.image.file});
 
@@ -13,6 +14,17 @@ const isoDate = pubDate.toISOString().slice(0, 10);
 const longDate = pubDate.toLocaleDateString('en-GB', {
   day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC'
 });
+
+// "This wall over time": only for a wall with at least 2 photos
+const showWall = wall !== undefined && wall.total >= 2;
+const WALL_CLICKABLE_MAX = 7;
+const wallClickable = showWall && wall.total <= WALL_CLICKABLE_MAX;
+const wallPrev = showWall && wall.position > 0 ? wall.members[wall.position - 1] : undefined;
+const wallNext = showWall && wall.position < wall.total - 1 ? wall.members[wall.position + 1] : undefined;
+const wallFirstYear = showWall ? wall.members[0].pubDate.getUTCFullYear() : 0;
+const wallLastYear = showWall ? wall.members[wall.total - 1].pubDate.getUTCFullYear() : 0;
+// Evenly spaced dots, not by date
+const dotLeft = (i: number) => showWall ? `left: ${(i / (wall.total - 1)) * 100}%` : '';
 
 const alt = isUnknown
   ? `Photo taken in ${item.data.place} on ${longDate}`
@@ -63,6 +75,58 @@ const alt = isUnknown
         <dt>Date</dt>
         <dd><time datetime={isoDate}>{longDate}</time></dd>
       </dl>
+      {showWall && (
+        <section class="wall" role="group" aria-label={`Same wall, photo ${wall.position + 1} of ${wall.total}`}>
+          <div class="wall-header">
+            <span class="wall-label">This wall over time</span>
+            <span class="wall-count">{wall.position + 1} of {wall.total}</span>
+          </div>
+          <div class:list={["wall-timeline", { compact: !wallClickable }]}>
+            <ol class="wall-track">
+              {wall.members.map((member, i) => (
+                <li class="wall-step" style={dotLeft(i)}>
+                  {i === wall.position ? (
+                    <span class="wall-dot current" aria-current="true"><span class="visually-hidden">{formatLongDate(member.pubDate)} (this photo)</span></span>
+                  ) : wallClickable ? (
+                    <button type="button" class="wall-dot" data-wall-target={member.index} aria-label={formatLongDate(member.pubDate)}></button>
+                  ) : (
+                    <span class="wall-dot"></span>
+                  )}
+                </li>
+              ))}
+            </ol>
+            <div class="wall-years" aria-hidden="true">
+              <span>{wallFirstYear}</span>
+              <span>{wallLastYear}</span>
+            </div>
+          </div>
+          <div class="wall-nav">
+            {wallPrev ? (
+              <button type="button" class="wall-button wall-prev" data-wall-target={wallPrev.index} aria-label={`Earlier on this wall, ${formatLongDate(wallPrev.pubDate)}`}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+                {formatShortDate(wallPrev.pubDate)}
+              </button>
+            ) : (
+              <button type="button" class="wall-button wall-prev" disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+                Earlier
+              </button>
+            )}
+            {wallNext ? (
+              <button type="button" class="wall-button wall-next" data-wall-target={wallNext.index} aria-label={`Later on this wall, ${formatLongDate(wallNext.pubDate)}`}>
+                {formatShortDate(wallNext.pubDate)}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </button>
+            ) : (
+              <button type="button" class="wall-button wall-next" disabled>
+                Later
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+              </button>
+            )}
+          </div>
+          <p class="wall-status" role="status"></p>
+        </section>
+      )}
       <a class="map-link" href={geoUrl} target="_blank" rel="noreferrer noopener">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
         See on the map
@@ -241,6 +305,217 @@ const alt = isUnknown
   .detail-left a:focus-visible {
     outline: 2px solid var(--main-color);
     outline-offset: 2px;
+  }
+
+  /* This wall over time */
+  .wall {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-top: 16px;
+    border-top: 1px solid color-mix(in srgb, var(--main-color) 20%, transparent);
+  }
+
+  .wall-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .wall-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.65;
+  }
+
+  .wall-count {
+    font-size: 13px;
+    opacity: 0.8;
+  }
+
+  /* Each step is a 44 x 44 hit area centred on its dot (narrower, display
+     only, above 7 photos); the track is inset by half a step so the first and
+     last dots sit at its ends. */
+  .wall-timeline {
+    --step: 44px;
+  }
+
+  .wall-timeline.compact {
+    --step: 20px;
+  }
+
+  .wall-track {
+    position: relative;
+    list-style: none;
+    margin: 0 calc(var(--step) / 2);
+    padding: 0;
+    height: 44px;
+  }
+
+  .wall-track::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 2px;
+    margin-top: -1px;
+    background-color: color-mix(in srgb, var(--main-color) 30%, transparent);
+  }
+
+  .wall-step {
+    position: absolute;
+    top: 0;
+    width: var(--step);
+    height: 44px;
+    margin-left: calc(var(--step) / -2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .wall-dot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--main-color);
+  }
+
+  /* The visible dot: a ring on the pane colour, so the line stops at it */
+  .wall-dot::before {
+    content: "";
+    box-sizing: border-box;
+    width: 10px;
+    height: 10px;
+    border: 2px solid var(--main-color);
+    border-radius: 50%;
+    background-color: var(--active-background-color);
+  }
+
+  .wall-dot.current::before {
+    width: 16px;
+    height: 16px;
+    border: 0;
+    background-color: var(--main-color);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--main-color) 35%, transparent);
+  }
+
+  .compact .wall-dot::before {
+    width: 8px;
+    height: 8px;
+  }
+
+  .compact .wall-dot.current::before {
+    width: 14px;
+    height: 14px;
+  }
+
+  button.wall-dot {
+    cursor: pointer;
+  }
+
+  button.wall-dot:hover::before {
+    background-color: var(--main-color);
+  }
+
+  .wall-years {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    opacity: 0.65;
+  }
+
+  .wall-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .wall-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 44px;
+    padding: 0 0.5rem;
+    border: 1px solid var(--main-color);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--main-color);
+    font: inherit;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .wall-button:not(:disabled):hover {
+    background-color: color-mix(in srgb, var(--main-color) 12%, transparent);
+  }
+
+  .wall-button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  /* Empty until a jump cleared the artist filter */
+  .wall-status {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  .wall-status:empty {
+    display: none;
+  }
+
+  .wall-status::before {
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 0.5rem;
+    vertical-align: -3px;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 16v-5M12 8h.01'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 16v-5M12 8h.01'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .wall-dot:focus-visible,
+  .wall-button:focus-visible {
+    outline: 2px solid var(--main-color);
+    outline-offset: 2px;
+  }
+
+  /* Crossfade between photos of the same wall */
+  .detail.wall-fade .detail-left img {
+    animation: wall-fade 200ms ease-out;
+  }
+
+  @keyframes wall-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .detail.wall-fade .detail-left img {
+      animation: none;
+    }
   }
 
   /* Desktop: inline pane under the thumbnail row, photo left, panel right.
