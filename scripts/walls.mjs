@@ -6,6 +6,7 @@
 //   node scripts/walls.mjs status
 //   node scripts/walls.mjs batch [--seeds N] [--radius M]
 //   node scripts/walls.mjs review <photo-id | wall-id> [--radius M]
+//   node scripts/walls.mjs near <photo-id>... [--radius M]
 //   node scripts/walls.mjs sheet --out <file.jpg> [--from <photo-id>] <photo-id>...
 //   node scripts/walls.mjs apply <plan.json> [--dry-run]
 //   node scripts/walls.mjs check
@@ -177,7 +178,7 @@ function cmdReview(target, opts) {
   if (!walls.has(target)) {
     const photo = photos.find((p) => p.id === target);
     if (!photo) fail(`no photo or wall named ${target}`);
-    if (!photo.wall) fail(`${target} has no wall yet: run the process mode`);
+    if (!photo.wall) fail(`${target} has no wall yet: use "near" to look for its wall`);
     wallId = photo.wall;
   }
   const members = photos.filter((p) => p.wall === wallId);
@@ -209,6 +210,65 @@ function cmdReview(target, opts) {
           .filter((p, i, all) => !p.wall && all.findIndex((q) => q.id === p.id) === i)
           .map((p) => brief(p, anchor))
       : [],
+  });
+}
+
+// Width / height of a photo as displayed (EXIF orientation applied).
+function aspectOf(p) {
+  try {
+    const out = execFileSync("identify", ["-format", "%w %h %[orientation]\n", p.image], { encoding: "utf8" });
+    const [w, h, o] = out.split("\n")[0].trim().split(/\s+/);
+    const turned = ["LeftTop", "RightTop", "RightBottom", "LeftBottom"].includes(o);
+    return turned ? Number(h) / Number(w) : Number(w) / Number(h);
+  } catch {
+    return null;
+  }
+}
+
+function shapeOf(ratio) {
+  if (ratio == null) return "unknown";
+  return ratio < 0.9 ? "portrait" : ratio > 1.1 ? "landscape" : "square";
+}
+
+// Candidates for one wall from the user's example photos: street-art photos
+// within the radius of ANY example (default 20 m), whose form factor matches
+// the examples (portrait vs landscape; square and unknown always pass).
+// Candidates with the wrong form factor are listed apart, not proposed.
+function cmdNear(ids, opts) {
+  if (!ids.length) fail("near needs at least one photo id");
+  const radius = Number(opts.radius ?? DEFAULT_RADIUS);
+  const photos = loadPhotos();
+  const examples = [...new Set(ids)].map((id) => photos.find((p) => p.id === id) ?? fail(`no street-art photo named ${id}`));
+  const located = examples.filter((p) => p.gps);
+  const exIds = new Set(examples.map((p) => p.id));
+  const shapes = new Set(examples.map((p) => shapeOf(aspectOf(p))).filter((s) => s === "portrait" || s === "landscape"));
+  const fits = (shape) => shape === "square" || shape === "unknown" || shapes.size === 0 || shapes.has(shape);
+  const candidates = [];
+  const excluded = [];
+  for (const p of photos) {
+    if (exIds.has(p.id) || !p.gps || !located.length) continue;
+    const d = Math.min(...located.map((e) => distance(e.gps, p.gps)));
+    if (d > radius) continue;
+    const ratio = aspectOf(p);
+    const item = { ...brief(p), distance_m: Math.round(d), shape: shapeOf(ratio), ratio: ratio && +ratio.toFixed(2) };
+    (fits(item.shape) ? candidates : excluded).push(item);
+  }
+  const walls = new Map();
+  for (const p of [...examples, ...candidates]) if (p.wall) walls.set(p.wall, [...(walls.get(p.wall) ?? []), p.id]);
+  print({
+    radius_m: radius,
+    examples: examples.map((p) => {
+      const ratio = aspectOf(p);
+      return { ...brief(p), shape: shapeOf(ratio), ratio: ratio && +ratio.toFixed(2) };
+    }),
+    examples_without_gps: examples.filter((p) => !p.gps).map((p) => p.id),
+    walls_involved: [...walls.entries()].map(([wall, members]) => ({
+      wall,
+      members_here: members,
+      members_all: photos.filter((p) => p.wall === wall).map((p) => p.id),
+    })),
+    candidates,
+    excluded_form_factor: excluded,
   });
 }
 
@@ -381,9 +441,10 @@ switch (command) {
   case "status": cmdStatus(); break;
   case "batch": cmdBatch(opts); break;
   case "review": cmdReview(rest[0], opts); break;
+  case "near": cmdNear(rest, opts); break;
   case "sheet": cmdSheet(rest, opts); break;
   case "apply": cmdApply(rest[0], opts); break;
   case "check": cmdCheck(); break;
   default:
-    fail("usage: walls.mjs status | batch [--seeds N] [--radius M] | review <id> | sheet --out f.jpg [--from id] ids... | apply plan.json [--dry-run] | check");
+    fail("usage: walls.mjs status | batch [--seeds N] [--radius M] | review <id> | near <id>... [--radius M] | sheet --out f.jpg [--from id] ids... | apply plan.json [--dry-run] | check");
 }
