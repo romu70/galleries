@@ -5,5 +5,6 @@
   },
   "geo": "mlat=47.203145&mlon=-1.552455#map=19/47.203145/-1.552455",
   "place": "Nantes, France",
-  "tag": "Ratz One"
+  "tag": "Ratz One",
+  "wall": "nantes-w005"
 }

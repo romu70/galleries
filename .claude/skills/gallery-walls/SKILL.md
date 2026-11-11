@@ -1,6 +1,6 @@
 ---
 name: gallery-walls
-description: Group street-art photos of the Galleries site by physical wall, so the detail view can show "This wall over time". Three modes. "wall" (main) takes a few example image links or photo ids of one wall (repainted over time), finds its other photos by matching proportions (within 500 m), asks the user to confirm, writes the wall and opens a PR. "review <photo-id | wall-id>" corrects an existing wall (move, split, merge). "process" is an optional sweep that proposes 5 groups from GPS proximity and visual comparison. Trigger when the user sends image links or photo ids of one wall ("these are the same wall", "same wall: …"), or says "process walls", "run gallery-walls", "next walls batch", "review wall nantes-w004", "this photo is on the wrong wall".
+description: Group street-art photos of the Galleries site by physical wall, so the detail view can show "This wall over time". Three modes. "wall" (main) takes a few example image links or photo ids of one wall (repainted over time), finds its other photos within 50 m (matching proportions first, then any close photo), asks the user to confirm, writes the wall and opens a PR. "review <photo-id | wall-id>" corrects an existing wall (move, split, merge). "process" is an optional sweep that proposes 5 groups from GPS proximity and visual comparison. Trigger when the user sends image links or photo ids of one wall ("these are the same wall", "same wall: …"), or says "process walls", "run gallery-walls", "next walls batch", "review wall nantes-w004", "this photo is on the wrong wall".
 ---
 
 # Gallery Walls
@@ -19,7 +19,7 @@ Assigns each street-art photo of `romu70/galleries` to the physical wall it show
   - `node scripts/walls.mjs status` — counts: processed, to process, without GPS, walls.
   - `node scripts/walls.mjs batch [--seeds N] [--radius M]` — oldest photos to process (with GPS), each with every street-art photo within `M` metres (default 20), processed or not.
   - `node scripts/walls.mjs review <photo-id | wall-id> [--radius M]` — a wall's members, the walls near it, and unprocessed photos near it.
-  - `node scripts/walls.mjs near <photo-id>... [--radius M] [--tolerance T]` — candidates for one wall from the user's examples: photos within `M` metres (default 500) of **any** example **and** whose width/height ratio is within `T` (default 0.05 = 5 %) of an example's ratio (EXIF orientation applied). Photos within 20 m with another ratio are only listed by id in `close_other_ratio`, not proposed. Also lists the walls the examples and candidates are already on (`walls_involved`).
+  - `node scripts/walls.mjs near <photo-id>... [--radius M] [--tolerance T] [--close C]` — candidates for one wall from the user's examples: `candidates` = photos within `M` metres (default 50) of **any** example **and** whose width/height ratio is within `T` (default 0.05 = 5 %) of an example's ratio (EXIF orientation applied); `close_other_ratio` = photos within `C` metres (default 25) with another ratio. Photos farther than `M` are ignored. Also lists the walls the examples and candidates are already on (`walls_involved`).
   - `node scripts/walls.mjs sheet --out <file.jpg> [--from <photo-id>] <photo-id>...` — numbered contact sheet in the order given; each label shows the number, entry id (which starts with the date), distance from `--from` (default: the first photo), and current wall or "to process".
   - `node scripts/walls.mjs check` — diff guard before committing (see Step 5).
   - `node scripts/walls.mjs apply <plan.json> [--dry-run]` — writes a plan (format below). Creates new walls with the next free `<town>-wNNN` (town from the oldest photo's `place`, `lat`/`lon` from the oldest photo with GPS), sets or changes `wall` on the listed photos, deletes wall files left with no photo. Prints a JSON summary.
@@ -51,31 +51,32 @@ The user sends a few photos they know show the same physical wall, usually a leg
 Learned from the user's corrections (`nantes-w004`, `reze-w004`):
 - **Proportions: the strongest signal.** The user frames each wall edge to edge, so all photos of one wall keep almost the same width/height ratio over the years: 2.92 and 2.88 for a long low band; 0.69–0.76 for a tapering pillar. Photos of neighbouring walls usually differ by far more than 5 % (1.3–1.4 or 2.47 next to the 2.9 band).
 - **Outline and fixed elements**: same silhouette (tapering pillar, overhang at the top), same edges, ground and surroundings. Often a recurring element (a painted stump at the base).
-- **GPS: unreliable.** Photos of one wall can be 130 m or even 430 m apart, while photos at 0 m can be different walls. Distance only bounds the search (500 m); it is never evidence.
+- **GPS: bounds the search, never proves it.** Most photos of one wall are within 25 m of each other, but photos at 0 m can be different walls. Searching wider brings more noise than signal, so `near` stops at **50 m**. A photo of the wall with its GPS far off (130 m and 430 m seen) is added only when the user names it.
+- **A cropped example** (painting cut at the edges, e.g. 1.72 for a wall photographed elsewhere at 3.38 and 2.94) makes its ratio meaningless: then the close photos with another ratio are the real candidates.
 - **Not evidence**: the artist, the colours, the subject. Each repaint changes them all. Neighbouring pillars of the same bridge have the same shape and ratio as each other: only the fixed elements tell them apart.
-- **Exception**: a photo framed tighter than usual (a close-up, e.g. ratio 0.50 on a 0.72 pillar) is missed by the ratio filter. The user adds it, or it shows up in `close_other_ratio`; never propose it without a reason.
+- **Exception**: a photo framed tighter than usual (a close-up, e.g. ratio 0.50 on a 0.72 pillar) is missed by the ratio filter. It shows up in `close_other_ratio`, or the user adds it; never propose it without a reason.
 
 ### W1 — Read the input
 - Accept site image links, detail page links or bare ids. Extract the id with the pattern `\d{4}-\d{2}-\d{2}-\d{2}` (the site's generated image URLs keep the original file name). Ignore duplicates. If an item yields no id, ask about that item only.
 - Each id must exist as `src/content/streetarts/<id>.json`. A fonts photo, or an unknown id, is reported and left out.
 
 ### W2 — Find the other photos of the wall
-1. `node scripts/walls.mjs near <example ids>` (500 m, ratio ±5 %). Do not change the radius or the tolerance, or search by artist, unless the user asks.
+1. `node scripts/walls.mjs near <example ids>` (50 m, ratio ±5 %, close list 25 m). Do not change the radius, the tolerance or the close distance, or search by artist, unless the user asks.
 2. Make one sheet of the examples and one of the candidates (`--from` the oldest example) and read them. From the examples, note the outline and fixed elements of this wall (see above).
 3. Keep a candidate only if it has that outline and those fixed elements. A matching ratio alone is not enough (neighbouring pillars). When unsure, keep it with a `⚠` and the reason.
 4. **Repeat**: once the user approves candidates, they become examples too. Run `near` again with all of them; propose only the new candidates. Stop when a round finds nothing new.
 5. Look at the current walls (`walls_involved`): examples and kept candidates on no wall → **new wall**; some on one existing wall → the others **join** it; spread over two or more existing walls → propose the merge and let the user decide.
-6. Do not propose `close_other_ratio` photos; mention their count in one line.
+6. Also make a sheet of `close_other_ratio` and read it. Propose one of those photos only with a stated reason: same outline or fixed elements, or a visibly cropped example. List the others in one line as left out.
 
 ### W3 — Confirm
 Send the examples sheet and the kept-candidates sheet, then one compact block:
 ```
 examples: 2024-06-30-01, 2024-11-30-01, 2025-05-08-01 (ratio 0.70–0.76)
 [1] 2023-02-01-01 (11 m, 0.74)    same pillar and stump
-[2] 2025-10-05-01 (130 m, 0.72)   same pillar, stump over the whole face
-left out: 2023-08-20-03, 2024-06-12-02 (same ratio, other pillars: no stump, other edges)
-5 other photos within 20 m with another ratio, not proposed
-→ new wall with the examples + 1, 2
+[2] 2024-05-25-01 (20 m, 0.69)    same pillar and stump
+[3] 2023-06-11-02 (20 m, 0.50, close list)   ⚠ close-up of the same pillar
+left out: 2023-01-12-01 (same ratio, another pillar); close list: 6 other photos, different walls
+→ new wall with the examples + 1, 2, 3
 ```
 Ask: `ok`, `drop k`, `only examples`. Write nothing before the answer.
 
@@ -198,7 +199,7 @@ Short:
 ## Edge cases
 
 - **Dense spots** (legal walls, a street with many murals): a seed can have 10+ candidates within 20 m that are different walls. Compare structure, not paint; propose small, confident groups and leave the doubtful candidates for later seeds.
-- **Same wall, GPS far off**: photos of one wall can be hundreds of metres apart (430 m seen). In mode `wall`, `near` searches 500 m by proportions. In `process`, if the user says a photo belongs to a wall the batch did not offer, use `merge with` / `move … to` as asked.
+- **Same wall, GPS far off**: photos of one wall can be hundreds of metres apart (430 m seen). `near` does not look past 50 m: the user names such photos, and they are added with a `⚠ <distance>` note. In `process`, if the user says a photo belongs to a wall the batch did not offer, use `merge with` / `move … to` as asked.
 - **Identical coordinates** for different works (photos taken in a row without a GPS update): distance 0 m is not evidence of the same wall.
 - **Form factor vs GPS**: same GPS point but one painting is vertical and the other horizontal → different walls, as a general rule. Same form factor is only weak evidence: it never makes up for different fixed features.
 - **A wall with 2 faces in one photo** (corner): the photo goes on the wall that is its main subject; mention it in the report.

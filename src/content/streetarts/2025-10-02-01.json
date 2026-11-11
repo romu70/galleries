@@ -5,5 +5,6 @@
   },
   "geo": "mlat=47.2033472222222&mlon=-1.55216111111111#map=19/47.2033472222222/-1.55216111111111",
   "place": "Nantes, France",
-  "tag": "Gama"
+  "tag": "Gama",
+  "wall": "nantes-w005"
 }
