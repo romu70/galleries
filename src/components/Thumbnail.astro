@@ -7,8 +7,11 @@ import Tag from '../components/Tag.astro';
 const { item, index } = Astro.props;
 
 // Responsive thumbnail: the browser picks the smallest file that is sharp for
-// the displayed size and the screen density.
-const THUMB_WIDTHS = [400, 800, 1200];
+// the displayed size and the screen density. The visible part of a thumbnail
+// gets at most 800 px: slightly soft on a 3x phone, about half the bytes of
+// 1200 px.
+const THUMB_WIDTHS = [400, 800];
+const MAX_VISIBLE = 800;
 
 // Width of the image box, per grid layout in Gallery.astro (.items-grid:
 // 1rem padding each side; .thumbnail: 1rem padding each side).
@@ -28,9 +31,10 @@ const BOX_RATIO = 1.618;
 const { width, height } = item.data.image.file;
 const overflow = Math.max(1, Math.round((width / height / BOX_RATIO) * 100) / 100);
 const scale = overflow === 1 ? '' : ` * ${overflow}`;
-// Very wide photos (banners, panoramas) can need more than 1200 px: offer the
-// source too, so they are never softer than the full file used before.
-const widths = overflow > 1 && width > 1200 ? [...THUMB_WIDTHS, width] : THUMB_WIDTHS;
+// A wide photo shows only part of its width: scale the cap by the same factor
+// so its visible part is as sharp as an ordinary thumbnail.
+const wideWidth = Math.min(width, Math.round(MAX_VISIBLE * overflow));
+const widths = wideWidth > MAX_VISIBLE ? [...THUMB_WIDTHS, wideWidth] : THUMB_WIDTHS;
 
 const sizes = columns
   .map(([media, n]) => `${media} calc(((100vw - 2rem) / ${n} - 2rem)${scale})`.trim())

@@ -40,7 +40,7 @@ Both causes are in the shared components, so the fonts page (`fonts.astro`, 98 p
 | # | Decision |
 |---|---|
 | L1 | Hidden detail panels are removed from layout (`display: none`), by **CSS by default**, not by script after load. |
-| L2 | Thumbnails get a responsive `srcset` (`widths` + `sizes`), with a maximum of 1200 px. |
+| L2 | Thumbnails get a responsive `srcset` (`widths` + `sizes`). The visible part gets at most 800 px (changed from 1200 px in PR 2: 1200 px kept iPhone at 3.2 MB; 800 px is slightly soft on a 3× phone). Photos wider than the box get `800 × overflow`, capped at the source width. |
 | L3 | Detail images keep a 1600 px maximum; the link to the full image (`<a href={theImage.src}>`) is unchanged. |
 | L4 | When a photo is opened, the previous and next visible photos (per the current filter) are preloaded. |
 | L5 | Load performance is checked by a script committed to the repo, not by eye. |
@@ -81,7 +81,7 @@ Done when the script reproduces the "as is" rows of §1.
 Done when: measured first load on iPhone is at most 15 images, and no image from a detail panel is fetched before a photo is opened; opening, closing, the arrows, the keyboard, the artist filter, the wall timeline and the phone full-screen view behave as before.
 
 ### PR 2 — Responsive thumbnails (fixes root cause 2)
-1. `Thumbnail.astro`: `<Image src=… alt="" widths={[400, 800, 1200]} sizes={…} />`.
+1. `Thumbnail.astro`: `<Image src=… alt="" widths={[400, 800]} sizes={…} />` (see L2 for wide photos).
 2. Derive `sizes` from the grid columns in `Gallery.astro`:
    - 1 column below 440 px;
    - 2 columns from 440 px;
