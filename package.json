@@ -8,7 +8,8 @@
     "build": "astro check && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "add-items": "node scripts/add-items.mjs"
+    "add-items": "node scripts/add-items.mjs",
+    "measure-load": "node scripts/measure-load.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.12",
@@ -16,5 +17,8 @@
     "@fontsource-variable/montserrat": "^5.0.20",
     "astro": "^7.4.7",
     "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "playwright": "^1.65.0"
   }
 }
