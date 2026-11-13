@@ -136,9 +136,11 @@ const alt = isUnknown
 </div>
 
 <style>
-  /* Phone: full screen, scrollable; photo, then metadata, divider, controls */
+  /* Phone: full screen, scrollable; photo, then metadata, divider, controls.
+     Closed panels are out of layout (display: none) so lazy loading does not
+     fetch their images; Gallery.astro adds .open to show one. */
   .detail {
-    display: flex;
+    display: none;
     flex-direction: column;
     /* Extra top padding to clear the hamburger menu */
     padding: 3.5rem 1rem 1.5rem;
@@ -150,6 +152,10 @@ const alt = isUnknown
     overflow-y: auto;
     transition: background-color var(--transDur);
     z-index: 10;
+  }
+
+  .detail.open {
+    display: flex;
   }
 
   .detail-left a {
