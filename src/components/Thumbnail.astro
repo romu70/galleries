@@ -5,10 +5,40 @@ import Location from '../components/Location.astro';
 import Tag from '../components/Tag.astro';
 
 const { item, index } = Astro.props;
+
+// Responsive thumbnail: the browser picks the smallest file that is sharp for
+// the displayed size and the screen density.
+const THUMB_WIDTHS = [400, 800, 1200];
+
+// Width of the image box, per grid layout in Gallery.astro (.items-grid:
+// 1rem padding each side; .thumbnail: 1rem padding each side).
+const columns: [string, number][] = [
+  ['(min-width: 1441px)', 6],
+  ['(min-width: 1282px)', 5],
+  ['(min-width: 1024px) and (orientation: landscape)', 4],
+  ['(min-width: 768px)', 3],
+  ['(min-width: 440px)', 2],
+  ['', 1],
+];
+
+// The box has the --aspect-ratio of gallery.css (golden ratio). A photo wider
+// than that is cropped to the box height (see cropAndPositionImage), so it is
+// displayed wider than the box by this factor.
+const BOX_RATIO = 1.618;
+const { width, height } = item.data.image.file;
+const overflow = Math.max(1, Math.round((width / height / BOX_RATIO) * 100) / 100);
+const scale = overflow === 1 ? '' : ` * ${overflow}`;
+// Very wide photos (banners, panoramas) can need more than 1200 px: offer the
+// source too, so they are never softer than the full file used before.
+const widths = overflow > 1 && width > 1200 ? [...THUMB_WIDTHS, width] : THUMB_WIDTHS;
+
+const sizes = columns
+  .map(([media, n]) => `${media} calc(((100vw - 2rem) / ${n} - 2rem)${scale})`.trim())
+  .join(', ');
 ---
 <div class="thumbnail" data-index={index}>
   <div class="thumbnail-image" >
-    <Image src={item.data.image.file} alt="" />
+    <Image src={item.data.image.file} alt="" widths={widths} sizes={sizes} />
   </div>
   <div class="thumbnail-metadata">
     <div class="thumbnail-metadata-top">
