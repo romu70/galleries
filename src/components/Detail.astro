@@ -26,6 +26,12 @@ const wallLastYear = showWall ? wall.members[wall.total - 1].pubDate.getUTCFullY
 // Evenly spaced dots, not by date
 const dotLeft = (i: number) => showWall ? `left: ${(i / (wall.total - 1)) * 100}%` : '';
 
+// Responsive detail image, at most 1600 px. Width of the photo box (see the
+// CSS below): phone, full width minus 1rem padding each side; desktop, minus
+// 2rem padding each side, the 3rem gap and the 20rem right column.
+const detailWidths = [800, 1600];
+const detailSizes = "(min-width: 768px) calc(100vw - 27rem), calc(100vw - 2rem)";
+
 const alt = isUnknown
   ? `Photo taken in ${item.data.place} on ${longDate}`
   : `Work by ${artists.join(' and ')}, ${item.data.place}`;
@@ -34,7 +40,7 @@ const alt = isUnknown
 <div class="detail" data-index={index} role="dialog" aria-label="Photo viewer">
   <div class="detail-left">
     <a href={theImage.src} target="_blank" rel="noreferrer noopener">
-      <Image src={item.data.image.file} alt={alt} data-index={index} />
+      <Image src={item.data.image.file} alt={alt} data-index={index} widths={detailWidths} sizes={detailSizes} />
     </a>
   </div>
   <div class="detail-right">

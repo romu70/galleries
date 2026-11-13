@@ -224,14 +224,38 @@ const wallInfo = getWallMembers(sorted);
       let thumbnail: Div = grid?.querySelector(`.thumbnail[data-index="${detail.dataset.index}"]`);
       markThumbnailActive(thumbnail);
 
-      // Into layout first: its image starts loading only from here
+      // Into layout first: its image starts loading only from here. Eager and
+      // high priority, so it does not wait for the scroll or the thumbnails.
       detail.classList.add("open");
+      loadDetailImage(detail, "high");
       layoutDetail(detail, thumbnail, true);
 
       currentShownDetail = detail;
 
       // Lets the header stay on top of the full-screen pane on phones
       document.body.classList.add("detail-open");
+    }
+  }
+
+  // Starts loading a detail panel's image, even while the panel is closed
+  // (display: none). The browser picks the file from the same srcset/sizes it
+  // will use once the panel is shown, so the cached file is reused.
+  function loadDetailImage(detail: Div, priority: "high" | "low") {
+    const img = detail?.querySelector<HTMLImageElement>('.detail-left img');
+    if (!img) return;
+    img.fetchPriority = priority;
+    img.loading = "eager";
+  }
+
+  // Preloads the previous and next photos of the visible list (artist filter
+  // applied), so the arrows show them without a blank.
+  function preloadNeighbours(index: number) {
+    const visibleIdx = visibleThumbnails.findIndex(t => Number(t.dataset.index) === index);
+    if (visibleIdx < 0) return;
+    for (const i of [visibleIdx - 1, visibleIdx + 1]) {
+      const neighbour = visibleThumbnails[i];
+      if (!neighbour) continue;
+      loadDetailImage(grid?.querySelector(`.detail[data-index="${neighbour.dataset.index}"]`), "low");
     }
   }
 
@@ -297,6 +321,8 @@ const wallInfo = getWallMembers(sorted);
       const nextButton = grid?.querySelector<HTMLButtonElement>(`.detail[data-index="${index}"] .next-button`);
       if (prevButton) prevButton.disabled = visibleIdx <= 0;
       if (nextButton) nextButton.disabled = visibleIdx >= visibleThumbnails.length - 1;
+
+      preloadNeighbours(index);
     }
   }
 
