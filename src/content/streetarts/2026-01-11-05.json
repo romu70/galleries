@@ -5,5 +5,6 @@
   },
   "geo": "mlat=47.1800222222222&mlon=-1.52558888888889#map=19/47.1800222222222/-1.52558888888889",
   "place": "Rezé, France",
-  "tag": "unknown"
+  "tag": "unknown",
+  "wall": "reze-w005"
 }
